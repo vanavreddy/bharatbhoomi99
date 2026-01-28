@@ -125,3 +125,42 @@ export const MAJOR_CITIES = [
   'Vadodara',
   'Ghaziabad',
 ];
+
+// Parking options matching the API
+export const PARKING_OPTIONS = [
+  { value: 'None', label: 'No Parking' },
+  { value: 'On-Site', label: 'On-Site Parking' },
+  { value: 'Road-Side', label: 'Road-Side Parking' },
+  { value: 'Garage', label: 'Garage' },
+  { value: 'Shared', label: 'Shared Parking' },
+  { value: 'Covered', label: 'Covered Parking' },
+];
+
+// Water supply options matching the API
+export const WATER_OPTIONS = [
+  { value: 'Municipal', label: 'Municipal/City Water' },
+  { value: 'Borewell', label: 'Borewell' },
+  { value: 'Open Well', label: 'Open Well' },
+  { value: 'Rain-Water Harvesting', label: 'Rain-Water Harvesting' },
+  { value: 'Tanker', label: 'Tanker Supply' },
+];
+
+// Electricity options matching the API
+export const ELECTRICITY_OPTIONS = [
+  { value: 'Grid', label: 'Grid/City Power' },
+  { value: 'Solar', label: 'Solar Power' },
+  { value: 'Generator', label: 'Generator Backup' },
+  { value: 'Inverter', label: 'Inverter Backup' },
+];
+
+// Property categories for the API
+export const PROPERTY_CATEGORIES = [
+  { value: 'Apartment', label: 'Apartment/Flat' },
+  { value: 'Independent House', label: 'Independent House' },
+  { value: 'Villa', label: 'Villa' },
+  { value: 'Builder Floor', label: 'Builder Floor' },
+  { value: 'Penthouse', label: 'Penthouse' },
+  { value: 'Studio', label: 'Studio Apartment' },
+  { value: 'Farm House', label: 'Farm House' },
+  { value: 'PG', label: 'PG/Hostel' },
+];

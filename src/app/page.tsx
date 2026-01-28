@@ -1,7 +1,7 @@
 import { Header, Footer, SkipLink } from '@/components/layout';
 import {
   Hero,
-  FeaturedProperties,
+  HowItWorks,
   PropertyTypes,
   Testimonials,
   CTASection,
@@ -15,7 +15,7 @@ export default function HomePage() {
       <main id="main-content">
         <Hero />
         <PropertyTypes />
-        <FeaturedProperties />
+        <HowItWorks />
         <Testimonials />
         <CTASection />
       </main>

@@ -1,49 +1,42 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Building2 } from 'lucide-react';
 
 interface LogoProps {
   className?: string;
-  showText?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'compact';
 }
 
-const sizes = {
-  sm: { icon: 'h-6 w-6', text: 'text-lg' },
-  md: { icon: 'h-8 w-8', text: 'text-xl' },
-  lg: { icon: 'h-10 w-10', text: 'text-2xl' },
-};
-
-export function Logo({ className, showText = true, size = 'md' }: LogoProps) {
-  const sizeClasses = sizes[size];
-
+export function Logo({ className, variant = 'default' }: LogoProps) {
   return (
     <Link
       href="/"
-      className={cn('flex items-center gap-2 group', className)}
+      className={cn('flex items-center gap-2.5 group', className)}
       aria-label="Bharat Bhoomi-99 - Home"
     >
-      <div className="relative">
-        <Building2
-          className={cn(
-            sizeClasses.icon,
-            'text-brand-primary transition-transform group-hover:scale-105'
-          )}
-          strokeWidth={1.5}
-        />
+      {/* Logo Icon */}
+      <div className="relative flex items-center justify-center w-9 h-9 bg-brand-primary rounded-lg">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          className="w-5 h-5 text-white"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
       </div>
-      {showText && (
-        <div className="flex flex-col leading-none">
-          <span
-            className={cn(
-              sizeClasses.text,
-              'font-heading font-bold text-brand-accent tracking-tight'
-            )}
-          >
-            Bharat Bhoomi-99
+
+      {/* Logo Text */}
+      {variant === 'default' && (
+        <div className="flex flex-col">
+          <span className="text-[17px] font-bold text-gray-900 leading-tight tracking-tight">
+            Bharat Bhoomi
           </span>
-          <span className="text-[10px] text-brand-secondary font-medium tracking-widest uppercase">
-            Real Estate | Builders
+          <span className="text-[11px] font-medium text-brand-primary tracking-wide">
+            Find Your Home
           </span>
         </div>
       )}

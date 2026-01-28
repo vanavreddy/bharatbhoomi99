@@ -6,3 +6,4 @@ export { Skeleton, SkeletonCard, SkeletonText } from './Skeleton';
 export { Select, type SelectProps, type SelectOption } from './Select';
 export { TextArea, type TextAreaProps } from './TextArea';
 export { Checkbox, type CheckboxProps } from './Checkbox';
+export { Pagination } from './Pagination';

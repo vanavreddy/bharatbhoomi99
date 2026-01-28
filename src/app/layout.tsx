@@ -74,6 +74,7 @@ export const metadata: Metadata = {
 };
 
 import { PAGE_TITLES } from '@/lib/constants/seo';
+import { AuthProvider } from '@/contexts';
 
 export default function RootLayout({
   children,
@@ -88,7 +89,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`${poppins.className} antialiased min-h-screen flex flex-col`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

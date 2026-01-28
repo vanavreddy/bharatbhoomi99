@@ -41,7 +41,7 @@ export function Footer() {
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <div className="mb-6">
-                <Logo showText={true} size="lg" />
+                <Logo />
               </div>
               <p className="text-gray-400 mb-6 max-w-sm">
                 Your trusted partner in finding the perfect rental property across India.

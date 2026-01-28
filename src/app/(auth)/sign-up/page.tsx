@@ -1,17 +1,227 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Button, Input, Checkbox, Card } from '@/components/ui';
-import { ROUTES } from '@/lib/constants';
-import { PAGE_TITLES, PAGE_DESCRIPTIONS } from '@/lib/constants/seo';
-import { User, Mail, Phone, Lock, ArrowRight } from 'lucide-react';
+'use client';
 
-export const metadata: Metadata = {
-  title: PAGE_TITLES.signUp,
-  description: PAGE_DESCRIPTIONS.signUp,
-  robots: { index: false, follow: false },
+import { useState, useCallback, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button, Input, Checkbox, Card } from '@/components/ui';
+import { useAuth } from '@/contexts';
+import { ROUTES } from '@/lib/constants';
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+
+// Password validation rules matching React Native app
+const PASSWORD_RULES = {
+  minLength: 6,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireDigit: true,
 };
 
+// Validation helpers
+const isValidEmail = (email: string): boolean => {
+  return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
+};
+
+const isValidPhone = (phone: string): boolean => {
+  const cleaned = phone.replace(/\D/g, '');
+  return cleaned.length >= 10;
+};
+
+const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  if (password.length < PASSWORD_RULES.minLength) {
+    errors.push(`At least ${PASSWORD_RULES.minLength} characters`);
+  }
+  if (PASSWORD_RULES.requireUppercase && !/[A-Z]/.test(password)) {
+    errors.push('At least one uppercase letter');
+  }
+  if (PASSWORD_RULES.requireLowercase && !/[a-z]/.test(password)) {
+    errors.push('At least one lowercase letter');
+  }
+  if (PASSWORD_RULES.requireDigit && !/\d/.test(password)) {
+    errors.push('At least one number');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  acceptTerms: boolean;
+}
+
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  acceptTerms?: string;
+}
+
 export default function SignUpPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const {
+    signUp,
+    isAuthenticated,
+    isLoading: authLoading,
+    error: authError,
+    clearError,
+  } = useAuth();
+
+  // Pre-fill from URL params (from sign-in redirect)
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: searchParams.get('email') || '',
+    phone: searchParams.get('phone') || '',
+    password: '',
+    confirmPassword: '',
+    acceptTerms: false,
+  });
+
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(ROUTES.HOME);
+    }
+  }, [isAuthenticated, router]);
+
+  // Clear errors when form changes
+  useEffect(() => {
+    setLocalError(null);
+    clearError();
+  }, [formData, clearError]);
+
+  // Handle input change
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+
+    // Clear field error on change
+    if (formErrors[name as keyof FormErrors]) {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  }, [formErrors]);
+
+  // Validate form
+  const validateForm = useCallback((): boolean => {
+    const errors: FormErrors = {};
+
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    }
+
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!isValidEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.phone.trim()) {
+      errors.phone = 'Phone number is required';
+    } else if (!isValidPhone(formData.phone)) {
+      errors.phone = 'Please enter a valid 10-digit phone number';
+    }
+
+    const passwordValidation = validatePassword(formData.password);
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (!passwordValidation.isValid) {
+      errors.password = `Password must have: ${passwordValidation.errors.join(', ')}`;
+    }
+
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!formData.acceptTerms) {
+      errors.acceptTerms = 'You must accept the terms and conditions';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [formData]);
+
+  // Handle form submission
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    setSuccessMessage(null);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await signUp({
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.replace(/\D/g, ''),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
+
+      setSuccessMessage('Account created successfully! Redirecting...');
+      // Redirect is handled by auth context
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : 'Failed to create account');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData, validateForm, signUp]);
+
+  const error = localError || authError;
+  const isLoading = isSubmitting || authLoading;
+
+  // Loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="w-full max-w-md flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md">
       <Card padding="lg">
@@ -24,15 +234,49 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        <form className="space-y-5">
-          <Input
-            label="Full Name"
-            name="name"
-            placeholder="Your full name"
-            leftIcon={<User className="h-5 w-5" />}
-            required
-            autoComplete="name"
-          />
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+            <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-green-700">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Name Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="First Name"
+              name="firstName"
+              placeholder="First name"
+              leftIcon={<User className="h-5 w-5" />}
+              value={formData.firstName}
+              onChange={handleChange}
+              error={formErrors.firstName}
+              disabled={isLoading}
+              autoComplete="given-name"
+              required
+            />
+            <Input
+              label="Last Name"
+              name="lastName"
+              placeholder="Last name"
+              value={formData.lastName}
+              onChange={handleChange}
+              error={formErrors.lastName}
+              disabled={isLoading}
+              autoComplete="family-name"
+              required
+            />
+          </div>
 
           <Input
             label="Email Address"
@@ -40,8 +284,12 @@ export default function SignUpPage() {
             type="email"
             placeholder="your@email.com"
             leftIcon={<Mail className="h-5 w-5" />}
-            required
+            value={formData.email}
+            onChange={handleChange}
+            error={formErrors.email}
+            disabled={isLoading}
             autoComplete="email"
+            required
           />
 
           <Input
@@ -50,92 +298,98 @@ export default function SignUpPage() {
             type="tel"
             placeholder="10-digit mobile number"
             leftIcon={<Phone className="h-5 w-5" />}
-            required
+            value={formData.phone}
+            onChange={handleChange}
+            error={formErrors.phone}
+            disabled={isLoading}
             autoComplete="tel"
             hint="We'll send a verification code"
-          />
-
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            placeholder="Create a strong password"
-            leftIcon={<Lock className="h-5 w-5" />}
-            required
-            autoComplete="new-password"
-            hint="Min 8 characters with uppercase, lowercase, number, and symbol"
-          />
-
-          <Input
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            placeholder="Confirm your password"
-            leftIcon={<Lock className="h-5 w-5" />}
-            required
-            autoComplete="new-password"
-          />
-
-          <Checkbox
-            name="acceptTerms"
-            label={
-              <span>
-                I agree to the{' '}
-                <Link href="/terms" className="text-brand-primary hover:underline">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-brand-primary hover:underline">
-                  Privacy Policy
-                </Link>
-              </span>
-            }
             required
           />
 
-          <Button type="submit" fullWidth size="lg" rightIcon={<ArrowRight className="h-5 w-5" />}>
-            Create Account
+          <div className="relative">
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Create a strong password"
+              leftIcon={<Lock className="h-5 w-5" />}
+              value={formData.password}
+              onChange={handleChange}
+              error={formErrors.password}
+              disabled={isLoading}
+              autoComplete="new-password"
+              hint="Min 6 characters with uppercase, lowercase, and number"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+
+          <div className="relative">
+            <Input
+              label="Confirm Password"
+              name="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Confirm your password"
+              leftIcon={<Lock className="h-5 w-5" />}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              error={formErrors.confirmPassword}
+              disabled={isLoading}
+              autoComplete="new-password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+
+          <div>
+            <Checkbox
+              name="acceptTerms"
+              checked={formData.acceptTerms}
+              onChange={handleChange}
+              disabled={isLoading}
+              label={
+                <span className="text-sm">
+                  I agree to the{' '}
+                  <Link href="/terms" className="text-brand-primary hover:underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="text-brand-primary hover:underline">
+                    Privacy Policy
+                  </Link>
+                </span>
+              }
+            />
+            {formErrors.acceptTerms && (
+              <p className="text-sm text-red-500 mt-1">{formErrors.acceptTerms}</p>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            disabled={isLoading}
+            rightIcon={isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
+          >
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </form>
-
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white text-gray-500">or sign up with</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" fullWidth type="button">
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Google
-          </Button>
-          <Button variant="outline" fullWidth type="button">
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
-            </svg>
-            GitHub
-          </Button>
-        </div>
 
         <p className="text-center text-sm text-gray-600 mt-8">
           Already have an account?{' '}
