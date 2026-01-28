@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin and auth pages
+Disallow: /api/
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /forgot-password
+
+# Sitemap
+Sitemap: https://bharatbhoomi99.com/sitemap.xml
