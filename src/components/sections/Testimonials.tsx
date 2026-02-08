@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { Container } from '@/components/layout';
 import { Card } from '@/components/ui';
 import { Star, Quote } from 'lucide-react';
@@ -7,27 +6,30 @@ const testimonials = [
   {
     id: 1,
     name: 'Priya Sharma',
+    initials: 'PS',
+    color: 'bg-rose-500',
     role: 'Software Engineer',
     location: 'Bangalore',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
     rating: 5,
     text: 'Found my dream apartment within a week! The verified listings gave me confidence, and the owner was exactly as described. Highly recommend Bharat Bhoomi-99.',
   },
   {
     id: 2,
     name: 'Rahul Verma',
+    initials: 'RV',
+    color: 'bg-blue-500',
     role: 'Business Owner',
     location: 'Mumbai',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
     rating: 5,
     text: 'As a property owner, listing my properties here has been incredibly easy. The tenant inquiries are genuine, and the process is completely transparent.',
   },
   {
     id: 3,
     name: 'Anita Reddy',
+    initials: 'AR',
+    color: 'bg-emerald-500',
     role: 'Marketing Manager',
     location: 'Hyderabad',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
     rating: 5,
     text: 'The filter options made it so easy to find exactly what I was looking for. Moved into my new home in just two weeks. Amazing experience!',
   },
@@ -68,14 +70,10 @@ export function Testimonials() {
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gray-200">
-                  <Image
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    fill
-                    sizes="48px"
-                    className="object-cover"
-                  />
+                <div className={`${testimonial.color} h-12 w-12 rounded-full flex items-center justify-center`}>
+                  <span className="text-white font-semibold text-sm">
+                    {testimonial.initials}
+                  </span>
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">
