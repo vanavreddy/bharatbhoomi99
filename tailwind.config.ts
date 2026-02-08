@@ -6,27 +6,53 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // Enable dark mode via class (add 'dark' class to html/body)
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Brand colors using CSS variables for centralized theming
+        // Change values in globals.css :root to update everywhere
         brand: {
-          primary: '#1B6B9C',
-          'primary-dark': '#145578',
-          'primary-light': '#2A8BC4',
-          accent: '#E84E35',
-          'accent-dark': '#C9402B',
-          'accent-light': '#F06A54',
-          secondary: '#5ABED8',
+          primary: 'rgb(var(--color-brand-primary) / <alpha-value>)',
+          'primary-dark': 'rgb(var(--color-brand-primary-dark) / <alpha-value>)',
+          'primary-light': 'rgb(var(--color-brand-primary-light) / <alpha-value>)',
+          accent: 'rgb(var(--color-brand-accent) / <alpha-value>)',
+          'accent-dark': 'rgb(var(--color-brand-accent-dark) / <alpha-value>)',
+          'accent-light': 'rgb(var(--color-brand-accent-light) / <alpha-value>)',
+          secondary: 'rgb(var(--color-brand-secondary) / <alpha-value>)',
         },
         semantic: {
-          success: '#0D7D4D',
-          'success-light': '#D4EDDA',
-          warning: '#B45309',
-          'warning-light': '#FEF3CD',
-          error: '#C41E3A',
-          'error-light': '#F8D7DA',
-          info: '#1B6B9C',
-          'info-light': '#D1ECF1',
+          success: 'rgb(var(--color-success) / <alpha-value>)',
+          'success-light': 'rgb(var(--color-success-light) / <alpha-value>)',
+          warning: 'rgb(var(--color-warning) / <alpha-value>)',
+          'warning-light': 'rgb(var(--color-warning-light) / <alpha-value>)',
+          error: 'rgb(var(--color-error) / <alpha-value>)',
+          'error-light': 'rgb(var(--color-error-light) / <alpha-value>)',
+          info: 'rgb(var(--color-info) / <alpha-value>)',
+          'info-light': 'rgb(var(--color-info-light) / <alpha-value>)',
+        },
+        // Theme-aware colors (will switch with dark mode)
+        theme: {
+          bg: {
+            primary: 'rgb(var(--color-bg-primary) / <alpha-value>)',
+            secondary: 'rgb(var(--color-bg-secondary) / <alpha-value>)',
+            tertiary: 'rgb(var(--color-bg-tertiary) / <alpha-value>)',
+          },
+          surface: {
+            DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+            elevated: 'rgb(var(--color-surface-elevated) / <alpha-value>)',
+          },
+          text: {
+            primary: 'rgb(var(--color-text-primary) / <alpha-value>)',
+            secondary: 'rgb(var(--color-text-secondary) / <alpha-value>)',
+            tertiary: 'rgb(var(--color-text-tertiary) / <alpha-value>)',
+            inverted: 'rgb(var(--color-text-inverted) / <alpha-value>)',
+          },
+          border: {
+            primary: 'rgb(var(--color-border-primary) / <alpha-value>)',
+            secondary: 'rgb(var(--color-border-secondary) / <alpha-value>)',
+          },
         },
       },
       fontFamily: {

@@ -12,6 +12,8 @@ export const ROUTES = {
   SIGN_UP: '/sign-up',
   PROFILE: '/profile',
   MY_PROPERTIES: '/my-properties',
+  BUILDERS: '/builders',
+  BUILDER_DETAIL: (slug: string) => `/builders/${slug}`,
 } as const;
 
 export const API_ROUTES = {

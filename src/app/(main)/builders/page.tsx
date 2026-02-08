@@ -1,0 +1,95 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import { Container } from '@/components/layout';
+import { BANGALORE_BUILDERS, ROUTES } from '@/lib/constants';
+import { Building2, MapPin, Calendar } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Popular Builders in Bangalore | Bharat Bhoomi',
+  description:
+    'Explore properties from top real estate developers in Bangalore including Prestige, Brigade, Sobha, Godrej, and more.',
+};
+
+export default function BuildersPage() {
+  return (
+    <main className="min-h-screen bg-gray-50">
+      {/* Header - responsive */}
+      <div className="bg-white border-b border-gray-200">
+        <Container>
+          <div className="py-6 sm:py-8 md:py-12">
+            <div className="flex items-center gap-3 mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center">
+                <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-brand-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                  Popular Builders
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600">in Bangalore</p>
+              </div>
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl">
+              Explore premium properties from Bangalore&apos;s most trusted real estate developers.
+              Find your dream home from builders with proven track records.
+            </p>
+          </div>
+        </Container>
+      </div>
+
+      {/* Builders Grid - responsive */}
+      <Container className="py-6 sm:py-8 md:py-12">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+          {BANGALORE_BUILDERS.map((builder) => (
+            <Link
+              key={builder.id}
+              href={ROUTES.BUILDER_DETAIL(builder.slug)}
+              className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-brand-primary hover:shadow-lg transition-all"
+            >
+              {/* Builder Logo Header */}
+              <div className="bg-gray-50 p-4 sm:p-6 flex items-center justify-center h-24 sm:h-32">
+                <Image
+                  src={builder.logo}
+                  alt={`${builder.name} logo`}
+                  width={120}
+                  height={80}
+                  className="max-w-[80px] sm:max-w-[120px] max-h-[50px] sm:max-h-[70px] object-contain"
+                />
+              </div>
+
+              {/* Builder Info */}
+              <div className="p-3 sm:p-4 md:p-5">
+                <h2 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-brand-primary transition-colors truncate">
+                  {builder.name}
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2 hidden sm:block">
+                  {builder.shortDescription}
+                </p>
+
+                {/* Stats - responsive */}
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1 sm:gap-3 text-xs sm:text-sm text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>{builder.projectCount}+ projects</span>
+                  </div>
+                  <div className="flex items-center gap-1 hidden md:flex">
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>Est. {builder.established}</span>
+                  </div>
+                </div>
+
+                {/* Headquarters - hidden on mobile */}
+                <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 hidden sm:block">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>{builder.headquarters}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Container>
+    </main>
+  );
+}
