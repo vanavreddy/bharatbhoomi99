@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Logo, SkipLink } from '@/components/layout';
+import { Logo } from '@/components/layout';
 
 export default function AuthLayout({
   children,
@@ -7,9 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <SkipLink />
-      <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col">
         {/* Simple Header */}
         <header className="py-4 px-6 border-b border-gray-100">
           <Logo />
@@ -30,7 +28,6 @@ export default function AuthLayout({
             <Link href="/terms" className="hover:text-brand-primary">Terms</Link>
           </p>
         </footer>
-      </div>
-    </>
+    </div>
   );
 }

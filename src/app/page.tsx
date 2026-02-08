@@ -1,4 +1,4 @@
-import { Header, Footer, SkipLink } from '@/components/layout';
+import { Header, Footer } from '@/components/layout';
 import {
   Hero,
   HowItWorks,
@@ -10,7 +10,6 @@ import {
 export default function HomePage() {
   return (
     <>
-      <SkipLink />
       <Header />
       <main id="main-content">
         <Hero />

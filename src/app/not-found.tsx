@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui';
-import { Header, Footer, Container, SkipLink } from '@/components/layout';
+import { Header, Footer, Container } from '@/components/layout';
 import { ROUTES } from '@/lib/constants';
 import { Home, Search } from 'lucide-react';
 
 export default function NotFound() {
   return (
     <>
-      <SkipLink />
       <Header />
       <main id="main-content" className="flex-1 flex items-center justify-center py-16">
         <Container size="sm">

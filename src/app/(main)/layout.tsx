@@ -1,4 +1,4 @@
-import { Header, Footer, SkipLink } from '@/components/layout';
+import { Header, Footer } from '@/components/layout';
 
 export default function MainLayout({
   children,
@@ -7,7 +7,6 @@ export default function MainLayout({
 }) {
   return (
     <>
-      <SkipLink />
       <Header />
       <main id="main-content" className="flex-1">
         {children}
