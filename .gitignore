@@ -214,3 +214,6 @@ storybook-static/
 # Project Specific
 # ================================
 # Add any project-specific sensitive files below
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
