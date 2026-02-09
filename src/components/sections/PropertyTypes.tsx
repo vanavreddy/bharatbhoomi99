@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Container } from '@/components/layout';
 import { Card } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
-import { Building2, Home, Castle, Map, Store, Users } from 'lucide-react';
+import { Building2, Home, Castle, Map, Store } from 'lucide-react';
 
 const propertyTypes = [
   {
@@ -40,13 +40,6 @@ const propertyTypes = [
     description: 'Office spaces and shops',
     count: '800+',
   },
-  {
-    type: 'pg',
-    label: 'PG/Hostels',
-    icon: Users,
-    description: 'Affordable shared accommodations',
-    count: '3,000+',
-  },
 ];
 
 export function PropertyTypes() {
@@ -63,7 +56,7 @@ export function PropertyTypes() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {propertyTypes.map((item) => (
             <Link
               key={item.type}

@@ -1,8 +1,17 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 import { Header, Footer, Container } from '@/components/layout';
 import { ROUTES } from '@/lib/constants';
 import { Home, Search } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Page Not Found',
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default function NotFound() {
   return (

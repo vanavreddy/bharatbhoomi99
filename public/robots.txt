@@ -7,6 +7,9 @@ Disallow: /api/
 Disallow: /sign-in
 Disallow: /sign-up
 Disallow: /forgot-password
+Disallow: /admin
+Disallow: /admin/login
+Disallow: /admin/builders
 
 # Sitemap
 Sitemap: https://bharatbhoomi99.com/sitemap.xml

@@ -5,14 +5,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { Container } from '@/components/layout';
-import { ROUTES, BANGALORE_BUILDERS } from '@/lib/constants';
+import { ROUTES } from '@/lib/constants';
+import { useBuilders } from '@/contexts';
 import type { Builder } from '@/types';
 import {
   Search,
   MapPin,
   Building2,
   Home,
-  Users,
   Briefcase,
   ChevronRight,
   ArrowRight,
@@ -21,7 +21,6 @@ import {
 const listingTabs = [
   { id: 'rent', label: 'Rent', icon: Home },
   { id: 'buy', label: 'Buy', icon: Building2 },
-  { id: 'pg', label: 'PG/Co-living', icon: Users },
   { id: 'commercial', label: 'Commercial', icon: Briefcase },
 ];
 
@@ -68,12 +67,13 @@ function BuilderCard({ builder, onClick }: { builder: Builder; onClick: () => vo
 const propertyTypes = [
   { label: 'Flat/Apartment', value: 'apartment' },
   { label: 'House/Villa', value: 'villa' },
-  { label: 'PG/Hostel', value: 'pg' },
+  { label: 'Plot/Land', value: 'plot' },
   { label: 'Office Space', value: 'office' },
 ];
 
 export function Hero() {
   const router = useRouter();
+  const { activeBuilders } = useBuilders();
   const [activeTab, setActiveTab] = useState('rent');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -104,14 +104,13 @@ export function Hero() {
     const tabLabels: Record<string, string> = {
       rent: 'Rent',
       buy: 'Buy',
-      pg: 'PG/Co-living',
       commercial: 'Commercial Space',
     };
 
     const typeLabels: Record<string, string> = {
       apartment: 'Apartments',
       villa: 'Houses/Villas',
-      pg: 'PG/Hostels',
+      plot: 'Plots/Land',
       office: 'Office Spaces',
     };
 
@@ -325,7 +324,7 @@ export function Hero() {
 
             {/* Builder grid - 2 cols on mobile, 3 on tablet, 4 on desktop */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {BANGALORE_BUILDERS.slice(0, 8).map((builder) => (
+              {activeBuilders.slice(0, 8).map((builder) => (
                 <BuilderCard
                   key={builder.id}
                   builder={builder}

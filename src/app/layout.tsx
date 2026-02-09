@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
-import { SITE_CONFIG, DEFAULT_KEYWORDS } from '@/lib/constants';
+import { SITE_CONFIG, DEFAULT_KEYWORDS, PAGE_TITLES } from '@/lib/constants';
+import { AuthProvider, BuilderProvider } from '@/contexts';
+import { JsonLd } from '@/components/seo';
+import { getOrganizationSchema, getWebSiteSchema } from '@/lib/seo';
 import './globals.css';
 
 const poppins = Poppins({
@@ -73,9 +76,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { PAGE_TITLES } from '@/lib/constants/seo';
-import { AuthProvider } from '@/contexts';
-
 export default function RootLayout({
   children,
 }: {
@@ -87,10 +87,14 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
+        <JsonLd data={getOrganizationSchema()} />
+        <JsonLd data={getWebSiteSchema()} />
       </head>
       <body className={`${poppins.className} antialiased min-h-screen flex flex-col`}>
         <AuthProvider>
-          {children}
+          <BuilderProvider>
+            {children}
+          </BuilderProvider>
         </AuthProvider>
       </body>
     </html>

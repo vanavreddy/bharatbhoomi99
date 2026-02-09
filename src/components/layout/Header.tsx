@@ -7,11 +7,16 @@ import { cn } from '@/lib/utils';
 import { Logo } from './Logo';
 import { Button } from '@/components/ui';
 import { NAV_ITEMS, ROUTES } from '@/lib/constants';
-import { Menu, X, Plus, User, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts';
+import { Menu, X, Plus, User, ChevronRight, Shield, LogOut } from 'lucide-react';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, isAuthenticated, isGuest, signOut } = useAuth();
+
+  const isAdmin = user?.role === 'admin';
+  const showAuthButtons = !isAuthenticated || isGuest;
 
   const isActive = (href: string) => {
     if (href.includes('?')) {
@@ -27,25 +32,19 @@ export function Header() {
         <nav
           className={cn(
             'relative mx-auto max-w-7xl rounded-[22px] overflow-hidden',
-            // Crystal clear water effect - no white tint
             'bg-transparent backdrop-blur-xl backdrop-saturate-150',
-            // Water-like refraction shadow
             'shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)]',
-            // Subtle crystal edge - like water surface tension
             'border border-black/[0.04]',
-            // Ring for glass edge definition
             'ring-1 ring-black/[0.02]'
           )}
           style={{
-            // Crystal clear blur
             WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
             backdropFilter: 'blur(20px) saturate(1.5)',
-            // Subtle water caustic effect
             background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 100%)',
           }}
           aria-label="Main navigation"
         >
-          {/* Top refraction highlight - like light hitting water surface */}
+          {/* Top refraction highlight */}
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
           {/* Bottom subtle shadow line */}
           <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-black/[0.03] to-transparent" />
@@ -86,17 +85,45 @@ export function Header() {
 
               <div className="h-5 w-px bg-gray-200/60" />
 
-              <Link
-                href={ROUTES.SIGN_IN}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden xl:inline">Login</span>
-              </Link>
+              {isAdmin && (
+                <Link
+                  href={ROUTES.ADMIN}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
+                >
+                  <Shield className="h-4 w-4" />
+                  <span className="hidden xl:inline">Admin</span>
+                </Link>
+              )}
 
-              <Button size="sm" className="px-4 rounded-full shadow-sm" asChild>
-                <Link href={ROUTES.SIGN_UP}>Sign Up</Link>
-              </Button>
+              {showAuthButtons ? (
+                <>
+                  <Link
+                    href={ROUTES.SIGN_IN}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden xl:inline">Login</span>
+                  </Link>
+
+                  <Button size="sm" className="px-4 rounded-full shadow-sm" asChild>
+                    <Link href={ROUTES.SIGN_UP}>Sign Up</Link>
+                  </Button>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700 font-medium hidden xl:inline">
+                    {user?.name || 'User'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => signOut()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-red-500 transition-colors rounded-full hover:bg-red-50"
+                    title="Sign Out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -119,7 +146,7 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Mobile Navigation - Crystal Clear Water Panel */}
+      {/* Mobile Navigation */}
       <div
         id="mobile-menu"
         className={cn(
@@ -181,22 +208,53 @@ export function Header() {
               <ChevronRight className="h-4 w-4 text-gray-400" />
             </Link>
 
+            {/* Admin link for mobile */}
+            {isAdmin && (
+              <Link
+                href={ROUTES.ADMIN}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
+              >
+                <span className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-brand-primary" />
+                  </div>
+                  Admin Panel
+                </span>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </Link>
+            )}
+
             {/* Divider */}
             <div className="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
             {/* Auth Buttons */}
-            <div className="flex gap-3">
-              <Button variant="outline" fullWidth className="rounded-xl" asChild>
-                <Link href={ROUTES.SIGN_IN} onClick={() => setIsMobileMenuOpen(false)}>
-                  Login
-                </Link>
-              </Button>
-              <Button fullWidth className="rounded-xl shadow-sm" asChild>
-                <Link href={ROUTES.SIGN_UP} onClick={() => setIsMobileMenuOpen(false)}>
-                  Sign Up
-                </Link>
-              </Button>
-            </div>
+            {showAuthButtons ? (
+              <div className="flex gap-3">
+                <Button variant="outline" fullWidth className="rounded-xl" asChild>
+                  <Link href={ROUTES.SIGN_IN} onClick={() => setIsMobileMenuOpen(false)}>
+                    Login
+                  </Link>
+                </Button>
+                <Button fullWidth className="rounded-xl shadow-sm" asChild>
+                  <Link href={ROUTES.SIGN_UP} onClick={() => setIsMobileMenuOpen(false)}>
+                    Sign Up
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm font-medium text-gray-700">{user?.name || 'User'}</span>
+                <button
+                  type="button"
+                  onClick={() => { signOut(); setIsMobileMenuOpen(false); }}
+                  className="flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-600"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

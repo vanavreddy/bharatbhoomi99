@@ -10,7 +10,6 @@ export const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
   { value: 'villa', label: 'Villa' },
   { value: 'plot', label: 'Plot' },
   { value: 'commercial', label: 'Commercial' },
-  { value: 'pg', label: 'PG/Hostel' },
 ];
 
 export const LISTING_TYPES: { value: ListingType; label: string }[] = [
@@ -162,5 +161,4 @@ export const PROPERTY_CATEGORIES = [
   { value: 'Penthouse', label: 'Penthouse' },
   { value: 'Studio', label: 'Studio Apartment' },
   { value: 'Farm House', label: 'Farm House' },
-  { value: 'PG', label: 'PG/Hostel' },
 ];

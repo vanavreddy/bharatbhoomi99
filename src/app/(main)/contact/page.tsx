@@ -1,12 +1,23 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/layout';
 import { Button, Input, TextArea, Card } from '@/components/ui';
-import { PAGE_TITLES, PAGE_DESCRIPTIONS } from '@/lib/constants/seo';
+import { JsonLd } from '@/components/seo';
+import { getLocalBusinessSchema } from '@/lib/seo';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '@/lib/constants/seo';
 import { Mail, Phone, MapPin, Clock, Send, MessageSquare, Headphones, Building2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: PAGE_TITLES.contact,
   description: PAGE_DESCRIPTIONS.contact,
+  alternates: {
+    canonical: `${SITE_CONFIG.url}/contact`,
+  },
+  openGraph: {
+    title: `${PAGE_TITLES.contact} | ${SITE_CONFIG.name}`,
+    description: PAGE_DESCRIPTIONS.contact,
+    url: `${SITE_CONFIG.url}/contact`,
+    images: [{ url: SITE_CONFIG.ogImage, alt: SITE_CONFIG.name }],
+  },
 };
 
 const contactInfo = [
@@ -19,13 +30,19 @@ const contactInfo = [
   {
     icon: Phone,
     label: 'Phone',
-    value: '+91 12345 67890',
-    href: 'tel:+911234567890',
+    value: '+91 94485 14449',
+    href: 'tel:+919448514449',
+  },
+  {
+    icon: Phone,
+    label: 'Alternate Phone',
+    value: '+91 99001 51820',
+    href: 'tel:+919900151820',
   },
   {
     icon: MapPin,
     label: 'Address',
-    value: 'Mumbai, Maharashtra, India',
+    value: 'No.99/1, Chandapura Dommasandra Road, Sri Bayalu Basaveshwara Swamy Temple, Kommasandra, Bengaluru - 562125',
     href: null,
   },
   {
@@ -57,6 +74,7 @@ const supportOptions = [
 export default function ContactPage() {
   return (
     <div className="py-8">
+      <JsonLd data={getLocalBusinessSchema()} />
       <Container>
         {/* Page Header */}
         <div className="text-center mb-12">
@@ -64,7 +82,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Have a question or need assistance? We're here to help.
+            Have a question or need assistance? We&apos;re here to help.
             Fill out the form below or reach out through any of our contact channels.
           </p>
         </div>
@@ -173,8 +191,8 @@ export default function ContactPage() {
               <div className="h-48 bg-gray-200 flex items-center justify-center">
                 <div className="text-center text-gray-500">
                   <MapPin className="h-8 w-8 mx-auto mb-2" />
-                  <p className="text-sm">Map will be displayed here</p>
-                  <p className="text-xs">(Add Google Maps API key)</p>
+                  <p className="text-sm">Kommasandra, Bengaluru</p>
+                  <p className="text-xs">562125</p>
                 </div>
               </div>
             </Card>

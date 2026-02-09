@@ -14,4 +14,6 @@ export interface Builder {
   projectCount: number;
   established: number;
   headquarters: string;
+  isActive: boolean;
+  propertyIds?: string[];
 }
