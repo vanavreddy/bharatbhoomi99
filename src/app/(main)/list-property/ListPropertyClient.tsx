@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Container } from '@/components/layout';
 import { Button, Input, Select, TextArea, Checkbox, Card } from '@/components/ui';
 import { useCreateProperty } from '@/hooks';
+import { useAuth } from '@/contexts';
 import {
   PROPERTY_CATEGORIES,
   FURNISHING_OPTIONS,
@@ -47,7 +48,7 @@ const VALIDATION = {
   bathrooms: { min: 1, max: 20 },
   rent: { min: 1, max: 10000000 },
   deposit: { min: 0, max: 10000000 },
-  address: { min: 5, max: 200 },
+  address: { min: 5, max: 50 },
   city: { min: 2, max: 50 },
   pincode: { length: 6 },
   state: { min: 2, max: 50 },
@@ -119,6 +120,7 @@ const initialFormData: FormData = {
 
 export default function ListPropertyClient() {
   const router = useRouter();
+  const { user, isAuthenticated, isGuest } = useAuth();
   const { createProperty, isCreating, error: apiError, reset } = useCreateProperty();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -323,40 +325,41 @@ export default function ListPropertyClient() {
       return;
     }
 
-    // TODO: In production, get email from auth context
-    const userEmail = 'user@example.com';
+    if (!isAuthenticated || isGuest || !user?.email) {
+      router.push(`/sign-in`);
+      return;
+    }
 
-    const result = await createProperty({
-      userEmail,
-      propertyName: formData.propertyName || `${formData.bedrooms} BHK ${formData.category}`,
-      bedrooms: parseInt(formData.bedrooms, 10),
-      bathrooms: parseInt(formData.bathrooms, 10),
-      rent: parseInt(formData.rent, 10),
-      deposit: parseInt(formData.deposit, 10),
-      area: parseInt(formData.area, 10),
-      isNegotiable: formData.isNegotiable,
-      isFurnished: formData.isFurnished,
-      comments: formData.comments,
-      parking: formData.parking,
-      water: formData.water,
-      electricity: formData.electricity,
-      category: formData.category,
-      address: {
-        addressLine1: formData.addressLine1,
-        addressLine2: formData.addressLine2 || undefined,
-        city: formData.city,
-        state: formData.state,
-        country: 'India',
-        zipCode: formData.pincode,
-        zone: formData.zone || undefined,
+    const userEmail = user.email;
+
+    const result = await createProperty(
+      {
+        userEmail,
+        propertyName: formData.propertyName || `${formData.bedrooms} BHK ${formData.category}`,
+        bedrooms: parseInt(formData.bedrooms, 10),
+        bathrooms: parseInt(formData.bathrooms, 10),
+        rent: parseInt(formData.rent, 10),
+        deposit: parseInt(formData.deposit, 10),
+        area: parseInt(formData.area, 10),
+        isNegotiable: formData.isNegotiable,
+        isFurnished: formData.isFurnished,
+        comments: formData.comments,
+        parking: formData.parking,
+        water: formData.water,
+        electricity: formData.electricity,
+        category: formData.category,
+        address: {
+          addressLine1: formData.addressLine1,
+          addressLine2: formData.addressLine2 || undefined,
+          city: formData.city,
+          state: formData.state,
+          country: 'India',
+          zipCode: formData.pincode,
+          zone: formData.zone || undefined,
+        },
       },
-      // TODO: Handle image upload via multipart/form-data
-      // images: formData.images.map(file => ({
-      //   uri: URL.createObjectURL(file),
-      //   name: file.name,
-      //   type: file.type,
-      // })),
-    });
+      formData.images.length > 0 ? formData.images : undefined
+    );
 
     if (result.success) {
       // Cleanup image previews

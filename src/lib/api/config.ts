@@ -21,8 +21,7 @@ export const API_CONFIG = {
       GENERATE_OTP: '/api/user/sms/generateAndSendOTPJson?countries=india',
       VALIDATE_OTP: '/api/user/sms/validateOTPJson',
       CREATE_USER: '/api/user/Create/',
-      VALIDATE_PASSWORD: '/api/user/validatePassword',
-      VALIDATE_MEMBER: '/api/user/validatemember',
+      VALIDATE_PASSWORD: '/api/user/validatemember',
     },
     AGENT: {
       DETAILS: '/api/agent/agencydetails',
@@ -32,10 +31,3 @@ export const API_CONFIG = {
 } as const;
 
 export type ApiEndpoint = typeof API_CONFIG.ENDPOINTS;
-
-// Convenience export for base URL access
-export const apiConfig = {
-  baseUrl: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  endpoints: API_CONFIG.ENDPOINTS,
-};

@@ -3,7 +3,6 @@
  * Matches React Native app API structure
  */
 
-import { API_CONFIG } from './config';
 import { ApiError } from './errors';
 import type {
   GenerateOTPRequest,
@@ -17,8 +16,6 @@ import type {
   User,
   AccountValidationResult,
 } from '@/types/auth.types';
-
-const { BASE_URL, ENDPOINTS } = API_CONFIG;
 
 /**
  * Clean phone number - remove non-digit characters
@@ -117,7 +114,7 @@ export const authService = {
       Otp: '',
     };
 
-    const response = await fetch(`${BASE_URL}${ENDPOINTS.AUTH.GENERATE_OTP}`, {
+    const response = await fetch('/api/auth/generate-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -165,7 +162,7 @@ export const authService = {
       Otp: otp,
     };
 
-    const response = await fetch(`${BASE_URL}${ENDPOINTS.AUTH.VALIDATE_OTP}`, {
+    const response = await fetch('/api/auth/validate-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -214,19 +211,13 @@ export const authService = {
       throw createAuthError('Email and password are required.', 400);
     }
 
-    // URL encode email and password for path
-    const encodedEmail = encodeURIComponent(email);
-    const encodedPassword = encodeURIComponent(password);
-
-    const response = await fetch(
-      `${BASE_URL}${ENDPOINTS.AUTH.VALIDATE_PASSWORD}/${encodedEmail}/${encodedPassword}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const response = await fetch('/api/auth/validate-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -288,7 +279,7 @@ export const authService = {
       userEmail: data.email,
     };
 
-    const response = await fetch(`${BASE_URL}${ENDPOINTS.AUTH.CREATE_USER}`, {
+    const response = await fetch('/api/auth/create-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -297,13 +288,15 @@ export const authService = {
     });
 
     if (!response.ok) {
-      if (response.status === 409) {
-        throw createAuthError('An account with this email or phone already exists.', 409);
-      }
       throw ApiError.fromHttpStatus(response.status, 'Failed to create account. Please try again.');
     }
 
     const result: CreateUserResponse = await response.json();
+
+    // Check for API errors (e.g. "Email address already exists")
+    if (result.apiErrors && result.apiErrors.length > 0) {
+      throw createAuthError(result.apiErrors[0] ?? 'Failed to create account.', 409);
+    }
 
     return result;
   },

@@ -51,7 +51,7 @@ export function usePropertySearch(
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   // Refs for cleanup and tracking

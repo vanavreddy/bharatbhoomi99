@@ -296,23 +296,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         password: data.password,
       });
 
-      // Auto-login after successful signup
-      const user: User = {
-        id: response.userId,
-        email: response.userEmail,
-        name: `${response.firstName} ${response.lastName}`.trim(),
-        firstName: response.firstName,
-        lastName: response.lastName,
-        phone: response.userPhone,
-        role: 'user',
-        isVerified: false,
-        isAgent: false,
-        agencyId: null,
-        agencyName: null,
-        createdAt: response.accountCreatedOn,
-      };
-
-      dispatchAuth({ type: 'LOGIN', payload: { user } });
+      // Auto-login after successful signup using model data
+      if (response.model) {
+        const user = mapMobileUserToUser(response.model);
+        dispatchAuth({ type: 'LOGIN', payload: { user } });
+      }
       dispatchOTP({ type: 'RESET' });
 
       return response;

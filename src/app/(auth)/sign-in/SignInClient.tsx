@@ -137,8 +137,8 @@ export default function SignInClient() {
     try {
       const response = await validateOTP(phone, otpCode);
 
-      // If userId is 0, user needs to register
-      if (response.mobileUser && response.mobileUser.userId === 0) {
+      // If no mobileUser or userId is 0, user needs to register
+      if (!response.mobileUser || response.mobileUser.userId === 0) {
         router.push(`${ROUTES.SIGN_UP}?phone=${encodeURIComponent(phone)}`);
         return;
       }

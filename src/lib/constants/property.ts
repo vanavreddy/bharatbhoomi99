@@ -152,13 +152,18 @@ export const ELECTRICITY_OPTIONS = [
   { value: 'Inverter', label: 'Inverter Backup' },
 ];
 
-// Property categories for the API
+// Property categories for the API (values match the React Native app / Azure backend)
 export const PROPERTY_CATEGORIES = [
-  { value: 'Apartment', label: 'Apartment/Flat' },
-  { value: 'Independent House', label: 'Independent House' },
-  { value: 'Villa', label: 'Villa' },
-  { value: 'Builder Floor', label: 'Builder Floor' },
-  { value: 'Penthouse', label: 'Penthouse' },
-  { value: 'Studio', label: 'Studio Apartment' },
-  { value: 'Farm House', label: 'Farm House' },
+  { value: 'apartment', label: 'Apartment/Flat' },
+  { value: 'independent_house', label: 'Independent House' },
+  { value: 'villa', label: 'Villa' },
+  { value: 'builder_floor', label: 'Builder Floor' },
+  { value: 'penthouse', label: 'Penthouse' },
+  { value: 'studio', label: 'Studio Apartment' },
+  { value: 'farm_house', label: 'Farm House' },
+  { value: 'plot', label: 'Plot / Land' },
+  { value: 'commercial_office', label: 'Commercial Office' },
+  { value: 'commercial_shop', label: 'Commercial Shop' },
+  { value: 'warehouse', label: 'Warehouse' },
+  { value: 'pg_hostel', label: 'PG / Hostel' },
 ];

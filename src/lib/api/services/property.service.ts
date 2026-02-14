@@ -12,8 +12,6 @@ import type {
   ExternalApiResponse,
   ExternalPropertyListItem,
   PropertySearchRequest,
-  CreatePropertyRequest,
-  CreatePropertyResponse,
   FiltersResponse,
 } from '../types';
 
@@ -22,7 +20,7 @@ export interface IPropertyService {
   getProperties(params?: PropertyQueryParams): Promise<PropertyListResponse>;
   getPropertyById(id: string): Promise<Property>;
   searchProperties(params: PropertySearchParams): Promise<PropertyListResponse>;
-  createProperty(data: CreatePropertyInput): Promise<CreatePropertyResult>;
+  createProperty(data: CreatePropertyInput, imageFiles?: File[]): Promise<CreatePropertyResult>;
   getFilterOptions(): Promise<FilterOptions>;
 }
 
@@ -65,7 +63,6 @@ export interface CreatePropertyInput {
     zipCode: string;
     zone?: string;
   };
-  images?: Array<{ uri: string; name: string; type: string }>;
 }
 
 // Result of creating a property
@@ -130,9 +127,6 @@ function buildSearchRequest(
       if (filters.minPrice !== undefined) rentRange.push(String(filters.minPrice));
       if (filters.maxPrice !== undefined) rentRange.push(String(filters.maxPrice));
       request.Rent = rentRange;
-    }
-    if (filters.furnishing && filters.furnishing.length > 0) {
-      // Map furnishing to appropriate field if needed
     }
   }
 
@@ -275,66 +269,110 @@ class PropertyService implements IPropertyService {
 
   /**
    * Create a new property listing
+   * Uses multipart/form-data with bracket-notation fields (required by Azure backend)
    */
-  async createProperty(input: CreatePropertyInput): Promise<CreatePropertyResult> {
-    const request: CreatePropertyRequest = {
-      UserEmail: input.userEmail,
-      UnitNo: [],
-      PropertyInformation: {
-        propertyName: input.propertyName,
-        bedRooms: String(input.bedrooms),
-        rent: input.rent,
-        deposit: input.deposit,
-        isNegotiable: input.isNegotiable || false,
-        area: String(input.area),
-        baths: String(input.bathrooms),
-        isFurnished: input.isFurnished || false,
-        comments: input.comments || '',
-        Parking: input.parking || 'None',
-        Water: input.water || 'Municipal',
-        Electricity: input.electricity || 'Available',
-        Category: input.category || 'Apartment',
-        createdOn: new Date().toISOString(),
-      },
-      Address: {
-        AddressLine1: input.address.addressLine1,
-        AddressLine2: input.address.addressLine2,
-        City: input.address.city,
-        State: input.address.state,
-        Country: input.address.country || 'India',
-        ZipCode: input.address.zipCode,
-        Zone: input.address.zone,
-        createdOn: new Date().toISOString(),
-      },
+  async createProperty(input: CreatePropertyInput, imageFiles?: File[]): Promise<CreatePropertyResult> {
+    const currentTime = new Date().toISOString();
+    const unitNumbers = ['1'];
+
+    const formData = new FormData();
+
+    // Top-level fields
+    formData.append('UserEmail', input.userEmail);
+
+    // UnitNo array
+    unitNumbers.forEach((unit, index) => {
+      formData.append(`UnitNo[${index}]`, unit);
+    });
+
+    // PropertyInformation fields (bracket notation matching Postman/Azure)
+    const propInfo: Record<string, string> = {
+      Type: (input.category || 'apartment').substring(0, 50),
+      PropertyName: input.propertyName.substring(0, 100),
+      BedRooms: String(input.bedrooms),
+      Baths: String(input.bathrooms),
+      Rent: String(input.rent),
+      Deposit: String(input.deposit),
+      IsNegotiable: String(input.isNegotiable || false),
+      Area: String(input.area),
+      IsFurnished: String(input.isFurnished || false),
+      Comments: (input.comments || '').substring(0, 500),
+      Parking: (input.parking || 'None').substring(0, 50),
+      Water: (input.water || 'Municipal').substring(0, 50),
+      Electricity: (input.electricity || 'Available').substring(0, 50),
+      Category: (input.category || 'apartment').substring(0, 50),
+      CreatedOn: currentTime,
     };
 
-    // Handle images if provided
-    if (input.images && input.images.length > 0) {
-      request.NKPropertyImages = [
-        {
-          UnitNo: '',
-          PropertyImages: input.images,
-        },
-      ];
+    for (const [key, value] of Object.entries(propInfo)) {
+      formData.append(`PropertyInformation[${key}]`, value);
     }
 
-    const { data } = await httpClient.post<CreatePropertyResponse>(
-      API_CONFIG.ENDPOINTS.PROPERTY.CREATE,
-      request
-    );
+    // Address fields (bracket notation) — truncated to DB column limits
+    const address: Record<string, string> = {
+      AddressLine1: input.address.addressLine1.substring(0, 50),
+      AddressLine2: (input.address.addressLine2 || '').substring(0, 50),
+      City: input.address.city.substring(0, 50),
+      State: input.address.state.substring(0, 50),
+      Country: (input.address.country || 'India').substring(0, 50),
+      ZipCode: input.address.zipCode.substring(0, 10),
+      Zone: (input.address.zone || 'Default').substring(0, 50),
+      UnitNo: unitNumbers.join(','),
+    };
 
-    if (!data.success) {
+    for (const [key, value] of Object.entries(address)) {
+      formData.append(`Address[${key}]`, value);
+    }
+
+    // Append images (matching RN app format: NKPropertyImages[0].PropertyImages)
+    if (imageFiles && imageFiles.length > 0) {
+      formData.append('NKPropertyImages[0].unitNo', '1');
+      for (const file of imageFiles) {
+        formData.append('NKPropertyImages[0].PropertyImages', file, file.name);
+      }
+    }
+
+    const fullUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROPERTY.CREATE}`;
+
+    const response = await fetch(fullUrl, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Azure returns validation errors in { errors: { "Field": ["message"] } } format
+      let message = 'Failed to create property';
+      if (data.errors) {
+        const firstError = Object.values(data.errors).flat()[0];
+        if (typeof firstError === 'string') message = firstError;
+      }
+      throw ApiError.fromHttpStatus(response.status, message);
+    }
+
+    // Azure returns { model: [propId, ...], isAuthorized, apiErrors, mobileUser }
+    if (data.apiErrors && data.apiErrors.length > 0) {
+      let errorMsg = data.apiErrors[0];
+      // Surface clean messages instead of raw SQL/server exceptions
+      if (errorMsg.includes('truncated')) {
+        errorMsg = 'One or more fields are too long. Please shorten your address or property details.';
+      } else if (errorMsg.includes('SqlException') || errorMsg.includes('Microsoft.Data')) {
+        errorMsg = 'A server error occurred. Please try again.';
+      }
       throw new ApiError({
         code: 'VALIDATION_ERROR',
-        message: data.message || 'Failed to create property',
+        message: errorMsg,
         retryable: false,
       });
     }
 
+    const propertyIds: number[] = data.model || [];
+
     return {
       success: true,
-      message: data.message || 'Property created successfully',
-      propertyId: data.propertyID,
+      message: 'Property created successfully',
+      propertyId: propertyIds[0],
     };
   }
 

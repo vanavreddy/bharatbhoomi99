@@ -1,12 +1,14 @@
 /**
  * Create Property API Route - POST /api/properties/create
- * Handles property creation
+ * Handles property creation with image uploads via multipart/form-data
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { propertyService, CreatePropertyInput } from '@/lib/api';
 import { isApiError } from '@/lib/api/errors';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic';
 
 // Validation schema for property creation
 const createPropertySchema = z.object({
@@ -33,20 +35,30 @@ const createPropertySchema = z.object({
     zipCode: z.string().min(1, 'Pincode is required'),
     zone: z.string().optional(),
   }),
-  images: z
-    .array(
-      z.object({
-        uri: z.string(),
-        name: z.string(),
-        type: z.string(),
-      })
-    )
-    .optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json().catch(() => null);
+    const contentType = request.headers.get('content-type') || '';
+
+    let body: unknown;
+    let imageFiles: File[] = [];
+
+    if (contentType.includes('multipart/form-data')) {
+      // Parse multipart FormData (supports image uploads)
+      const formData = await request.formData();
+      const dataField = formData.get('data');
+      if (typeof dataField === 'string') {
+        body = JSON.parse(dataField);
+      }
+      // Extract image files
+      imageFiles = formData
+        .getAll('images')
+        .filter((f): f is File => f instanceof File);
+    } else {
+      // Fallback: parse JSON body (no images)
+      body = await request.json().catch(() => null);
+    }
 
     if (!body) {
       return NextResponse.json(
@@ -90,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     const input: CreatePropertyInput = validation.data;
-    const result = await propertyService.createProperty(input);
+    const result = await propertyService.createProperty(input, imageFiles.length > 0 ? imageFiles : undefined);
 
     if (!result.success) {
       return NextResponse.json(

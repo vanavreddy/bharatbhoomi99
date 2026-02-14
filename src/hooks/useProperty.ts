@@ -25,8 +25,9 @@ export function useProperty(
 ): UsePropertyResult {
   const { enabled = true } = options;
 
+  // Start in loading state when we know a fetch will happen immediately
   const [property, setProperty] = useState<Property | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!id && enabled);
   const [error, setError] = useState<string | null>(null);
 
   // Track mounted state

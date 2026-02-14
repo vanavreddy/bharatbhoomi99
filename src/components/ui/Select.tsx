@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type SelectHTMLAttributes } from 'react';
+import { forwardRef, useId, type SelectHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 
@@ -36,7 +36,8 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
-    const selectId = id || `select-${Math.random().toString(36).substring(2, 9)}`;
+    const reactId = useId();
+    const selectId = id || `select-${reactId}`;
     const errorId = error ? `${selectId}-error` : undefined;
     const hintId = hint ? `${selectId}-hint` : undefined;
 

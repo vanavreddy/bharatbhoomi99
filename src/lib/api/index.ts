@@ -32,8 +32,6 @@ export type {
   ExternalPropertyDetail,
   ExternalPropertyDetailResponse,
   PropertySearchRequest,
-  CreatePropertyRequest,
-  CreatePropertyResponse,
   FilterOption,
   FiltersResponse,
 } from './types';

@@ -68,11 +68,6 @@ export interface ValidateOTPRequest {
   Otp: string;
 }
 
-export interface ValidatePasswordRequest {
-  email: string;
-  password: string;
-}
-
 export interface CreateUserRequest {
   userPhone: string;
   userName: string;
@@ -114,18 +109,10 @@ export interface ValidatePasswordResponse {
 }
 
 export interface CreateUserResponse {
-  readonly userId: number;
-  readonly userPhone: string;
-  readonly userEmail: string;
-  readonly userName: string;
-  readonly userPassword: string;
-  readonly firstName: string;
-  readonly lastName: string;
-  readonly accountCreatedOn: string;
-  readonly accountAccessedOn: string;
-  readonly accountActive: boolean;
-  readonly accountLocked: boolean;
-  readonly accountExpired: boolean;
+  readonly model: MobileUser | null;
+  readonly isAuthorized: boolean;
+  readonly apiErrors: string[];
+  readonly mobileUser: MobileUser | null;
 }
 
 // ============================================
@@ -199,24 +186,3 @@ export interface AccountValidationResult {
   errorCode?: 'LOCKED' | 'EXPIRED' | 'INACTIVE';
 }
 
-// ============================================
-// Auth Context Types
-// ============================================
-
-export interface AuthContextValue extends AuthState {
-  // OTP-based authentication
-  generateOTP: (phone: string) => Promise<GenerateOTPResponse>;
-  validateOTP: (phone: string, otp: string) => Promise<ValidateOTPResponse>;
-
-  // Email/Password authentication
-  signInWithEmail: (email: string, password: string) => Promise<ValidatePasswordResponse>;
-
-  // User management
-  signUp: (data: SignUpData) => Promise<CreateUserResponse>;
-  signOut: () => Promise<void>;
-  loginAsGuest: () => void;
-
-  // State
-  otpState: OTPState;
-  clearError: () => void;
-}

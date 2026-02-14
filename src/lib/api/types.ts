@@ -161,61 +161,6 @@ export interface PropertySearchRequest {
   userId?: number;
 }
 
-// Create property request
-export interface CreatePropertyRequest {
-  UserEmail: string;
-  propID?: number;
-  EditMode?: boolean;
-  UnitNo: string[];
-  PropertyInformation: {
-    propertyID?: number;
-    addressID?: number;
-    propertyName: string;
-    type?: string;
-    bedRooms: string;
-    rent: number;
-    deposit: number;
-    isNegotiable: boolean;
-    area: string;
-    baths: string;
-    isFurnished: boolean;
-    comments: string;
-    Parking: string;
-    Water: string;
-    Electricity: string;
-    Category: string;
-    noOfImages?: number;
-    oUserID?: number;
-    createdOn?: string;
-  };
-  Address: {
-    addressID?: number;
-    userId?: number;
-    City: string;
-    State: string;
-    Country: string;
-    ZipCode: string;
-    Zone?: string;
-    AddressLine1: string;
-    AddressLine2?: string;
-    UnitNo?: string;
-    createdOn?: string;
-  };
-  NKPropertyImages?: Array<{
-    UnitNo: string;
-    PropertyImages: Array<{ uri: string; name: string; type: string }>;
-  }>;
-  OriginalImages?: string[];
-  imageLinks?: string[];
-}
-
-export interface CreatePropertyResponse {
-  success: boolean;
-  message: string;
-  propertyID?: number;
-  data?: unknown;
-}
-
 // Filter options from API
 export interface FilterOption {
   id: number;

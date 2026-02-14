@@ -15,7 +15,7 @@ interface CreatePropertyResult {
 }
 
 interface UseCreatePropertyResult {
-  createProperty: (input: CreatePropertyInput) => Promise<CreatePropertyResult>;
+  createProperty: (input: CreatePropertyInput, images?: File[]) => Promise<CreatePropertyResult>;
   isCreating: boolean;
   error: string | null;
   validationErrors: Record<string, string[]> | null;
@@ -49,7 +49,7 @@ export function useCreateProperty(): UseCreatePropertyResult {
   }, []);
 
   const createProperty = useCallback(
-    async (input: CreatePropertyInput): Promise<CreatePropertyResult> => {
+    async (input: CreatePropertyInput, images?: File[]): Promise<CreatePropertyResult> => {
       // Don't start if already unmounted
       if (!mountedRef.current) {
         return { success: false, message: 'Component unmounted' };
@@ -68,10 +68,18 @@ export function useCreateProperty(): UseCreatePropertyResult {
       setValidationErrors(null);
 
       try {
+        // Build FormData: JSON fields in 'data', image files in 'images'
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(input));
+        if (images && images.length > 0) {
+          for (const file of images) {
+            formData.append('images', file);
+          }
+        }
+
         const response = await fetch('/api/properties/create', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(input),
+          body: formData, // Browser auto-sets Content-Type with boundary
           signal: currentController.signal,
         });
 
