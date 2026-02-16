@@ -10,35 +10,30 @@ const propertyTypes = [
     label: 'Apartments',
     icon: Building2,
     description: 'Modern flats in prime locations',
-    count: '5,000+',
   },
   {
     type: 'house',
     label: 'Houses',
     icon: Home,
     description: 'Independent houses for families',
-    count: '2,500+',
   },
   {
     type: 'villa',
     label: 'Villas',
     icon: Castle,
     description: 'Luxury villas with premium amenities',
-    count: '500+',
   },
   {
     type: 'plot',
     label: 'Plots',
     icon: Map,
     description: 'Land for your dream project',
-    count: '1,000+',
   },
   {
     type: 'commercial',
     label: 'Commercial',
     icon: Store,
     description: 'Office spaces and shops',
-    count: '800+',
   },
 ];
 
@@ -73,12 +68,9 @@ export function PropertyTypes() {
                 <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-brand-primary transition-colors">
                   {item.label}
                 </h3>
-                <p className="text-xs text-gray-500 mb-2 line-clamp-2">
+                <p className="text-xs text-gray-500 line-clamp-2">
                   {item.description}
                 </p>
-                <span className="text-sm font-medium text-brand-primary">
-                  {item.count}
-                </span>
               </Card>
             </Link>
           ))}

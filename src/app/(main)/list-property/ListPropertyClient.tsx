@@ -369,6 +369,49 @@ export default function ListPropertyClient() {
     }
   };
 
+  // Gate: require login before showing the form
+  if (!isAuthenticated || isGuest) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-brand-primary/10 rounded-2xl flex items-center justify-center">
+            <Home className="h-10 w-10 text-brand-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">Sign in to List Your Property</h1>
+          <p className="text-gray-500 mb-8">
+            Create an account or sign in to list your property for free on Bharat Bhoomi 99.
+          </p>
+          <div className="space-y-3">
+            <Button
+              fullWidth
+              size="lg"
+              className="rounded-xl"
+              onClick={() => router.push('/sign-up')}
+            >
+              Sign Up
+            </Button>
+            <Button
+              fullWidth
+              size="lg"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => router.push('/sign-in')}
+            >
+              Login
+            </Button>
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              className="w-full py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Success state
   if (success) {
     return (

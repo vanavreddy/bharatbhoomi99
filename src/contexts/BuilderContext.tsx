@@ -12,6 +12,8 @@ import type { Builder } from '@/types/builder.types';
 import { BANGALORE_BUILDERS } from '@/lib/constants/builders';
 
 const STORAGE_KEY = 'bharatbhoomi_builders';
+const STORAGE_VERSION_KEY = 'bharatbhoomi_builders_version';
+const CURRENT_VERSION = 2; // Bump to reset all visitors to new defaults
 
 // ============================================
 // Builder State
@@ -90,6 +92,17 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   // Initialize from localStorage, merging with defaults
   useEffect(() => {
     try {
+      const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+      const version = storedVersion ? parseInt(storedVersion, 10) : 0;
+
+      // If version mismatch, reset to new defaults (all builders inactive)
+      if (version < CURRENT_VERSION) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.setItem(STORAGE_VERSION_KEY, String(CURRENT_VERSION));
+        dispatch({ type: 'INIT', payload: BANGALORE_BUILDERS });
+        return;
+      }
+
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const storedBuilders: Builder[] = JSON.parse(stored);
@@ -100,6 +113,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       } else {
         dispatch({ type: 'INIT', payload: BANGALORE_BUILDERS });
       }
+      localStorage.setItem(STORAGE_VERSION_KEY, String(CURRENT_VERSION));
     } catch {
       dispatch({ type: 'INIT', payload: BANGALORE_BUILDERS });
     }

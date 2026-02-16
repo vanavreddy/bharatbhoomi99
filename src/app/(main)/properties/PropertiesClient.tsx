@@ -458,7 +458,7 @@ function PropertiesContent() {
               variant={viewMode}
               columns={viewMode === 'grid' ? 3 : 2}
               isLoading={isLoading || isSearching}
-              emptyMessage="No properties match your filters. Try adjusting your search criteria."
+              emptyMessage="No properties found. Try adjusting your filters or check back soon for new listings."
             />
 
             {/* Pagination */}

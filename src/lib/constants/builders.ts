@@ -18,7 +18,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 300,
     established: 1986,
     headquarters: 'Bangalore',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'brigade',
@@ -33,7 +33,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 250,
     established: 1986,
     headquarters: 'Bangalore',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'sobha',
@@ -48,7 +48,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 150,
     established: 1995,
     headquarters: 'Bangalore',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'godrej',
@@ -63,7 +63,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 200,
     established: 1990,
     headquarters: 'Mumbai',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'birla',
@@ -78,7 +78,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 50,
     established: 2016,
     headquarters: 'Mumbai',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'assetz',
@@ -93,7 +93,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 30,
     established: 2006,
     headquarters: 'Bangalore',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'salarpuria',
@@ -108,7 +108,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 100,
     established: 1986,
     headquarters: 'Bangalore',
-    isActive: true,
+    isActive: false,
   },
   {
     id: 'puravankara',
@@ -123,7 +123,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
     projectCount: 80,
     established: 1975,
     headquarters: 'Bangalore',
-    isActive: true,
+    isActive: false,
   },
 ];
 

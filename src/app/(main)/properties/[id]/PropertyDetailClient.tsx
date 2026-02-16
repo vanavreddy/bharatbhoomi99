@@ -182,12 +182,17 @@ function ErrorState({ error, onRetry }: { error: string; onRetry: () => void }) 
 }
 
 // Image gallery component
-function ImageGallery({ images, title }: { images: readonly { id: string; url: string; alt: string; isPrimary: boolean }[]; title: string }) {
+function ImageGallery({ images, title, isLoggedIn, onLoginPrompt }: { images: readonly { id: string; url: string; alt: string; isPrimary: boolean }[]; title: string; isLoggedIn: boolean; onLoginPrompt: () => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const primaryImage = images.find((img) => img.isPrimary) || images[0];
   const selectedImage = images[selectedIndex] || primaryImage;
+
+  // Limit visible images for non-logged-in users
+  const MAX_FREE_IMAGES = 2;
+  const visibleImages = isLoggedIn ? images : images.slice(0, MAX_FREE_IMAGES);
+  const hasHiddenImages = !isLoggedIn && images.length > MAX_FREE_IMAGES;
 
   if (!images.length || !selectedImage) {
     return (
@@ -200,15 +205,29 @@ function ImageGallery({ images, title }: { images: readonly { id: string; url: s
     );
   }
 
+  const handleNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!isLoggedIn && selectedIndex >= MAX_FREE_IMAGES - 1) {
+      onLoginPrompt();
+      return;
+    }
+    setSelectedIndex((prev) => (prev === visibleImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const handlePrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setSelectedIndex((prev) => (prev === 0 ? visibleImages.length - 1 : prev - 1));
+  };
+
   return (
     <>
       {/* Main Image */}
       <div
         className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 cursor-pointer group"
-        onClick={() => setIsLightboxOpen(true)}
+        onClick={() => isLoggedIn ? setIsLightboxOpen(true) : onLoginPrompt()}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && setIsLightboxOpen(true)}
+        onKeyDown={(e) => e.key === 'Enter' && (isLoggedIn ? setIsLightboxOpen(true) : onLoginPrompt())}
       >
         <Image
           src={selectedImage.url}
@@ -220,14 +239,11 @@ function ImageGallery({ images, title }: { images: readonly { id: string; url: s
         />
 
         {/* Navigation arrows */}
-        {images.length > 1 && (
+        {visibleImages.length > 1 && (
           <>
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-              }}
+              onClick={(e) => { e.stopPropagation(); handlePrev(e); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
               aria-label="Previous image"
             >
@@ -235,10 +251,7 @@ function ImageGallery({ images, title }: { images: readonly { id: string; url: s
             </button>
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-              }}
+              onClick={(e) => { e.stopPropagation(); handleNext(e); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
               aria-label="Next image"
             >
@@ -254,16 +267,26 @@ function ImageGallery({ images, title }: { images: readonly { id: string; url: s
           </div>
         )}
 
-        {/* View all photos */}
-        <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-white/90 text-gray-700 text-sm font-medium rounded-full hover:bg-white transition-colors">
-          View all photos
-        </div>
+        {/* View all photos / Sign in to see more */}
+        {hasHiddenImages ? (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onLoginPrompt(); }}
+            className="absolute bottom-4 left-4 px-3 py-1.5 bg-brand-primary text-white text-sm font-medium rounded-full hover:bg-brand-primary-dark transition-colors"
+          >
+            Sign in to see all {images.length} photos
+          </button>
+        ) : images.length > 1 ? (
+          <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-white/90 text-gray-700 text-sm font-medium rounded-full hover:bg-white transition-colors">
+            View all photos
+          </div>
+        ) : null}
       </div>
 
       {/* Thumbnails */}
-      {images.length > 1 && (
+      {visibleImages.length > 1 && (
         <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-          {images.slice(0, 6).map((image, index) => (
+          {visibleImages.slice(0, 6).map((image, index) => (
             <button
               key={image.id}
               type="button"
@@ -281,7 +304,16 @@ function ImageGallery({ images, title }: { images: readonly { id: string; url: s
               />
             </button>
           ))}
-          {images.length > 6 && (
+          {hasHiddenImages && (
+            <button
+              type="button"
+              onClick={onLoginPrompt}
+              className="w-20 h-16 flex-shrink-0 rounded-lg bg-gray-100 flex items-center justify-center text-sm font-medium text-brand-primary hover:bg-brand-primary/10 transition-colors"
+            >
+              +{images.length - MAX_FREE_IMAGES}
+            </button>
+          )}
+          {isLoggedIn && images.length > 6 && (
             <button
               type="button"
               onClick={() => setIsLightboxOpen(true)}
@@ -293,8 +325,8 @@ function ImageGallery({ images, title }: { images: readonly { id: string; url: s
         </div>
       )}
 
-      {/* Lightbox */}
-      {isLightboxOpen && (
+      {/* Lightbox - only for logged-in users */}
+      {isLightboxOpen && isLoggedIn && (
         <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
           <button
             type="button"
@@ -413,7 +445,7 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
             <div className="lg:col-span-2 space-y-8">
               {/* Image Gallery */}
               <div className="relative">
-                <ImageGallery images={property.images} title={property.title} />
+                <ImageGallery images={property.images} title={property.title} isLoggedIn={isLoggedIn} onLoginPrompt={() => setShowLoginModal(true)} />
 
                 {/* Action buttons */}
                 <div className="absolute top-4 right-4 flex gap-2 z-10">
