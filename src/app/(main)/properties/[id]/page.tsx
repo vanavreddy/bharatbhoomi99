@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
 
   try {
     const property = await propertyService.getPropertyById(id);
-    const title = `${property.title} - ${property.bedrooms} BHK ${property.type} for ${property.listingType === 'rent' ? 'Rent' : 'Sale'} in ${property.address.locality}, ${property.address.city}`;
+    const title = `${property.title} - ${property.bedrooms} BHK ${property.type} for Sale in ${property.address.locality}, ${property.address.city}`;
     const description = property.description
       ? property.description.slice(0, 160)
       : `${property.bedrooms} BHK ${property.type} available for ${property.listingType} in ${property.address.locality}, ${property.address.city}. ${property.area} sq.ft, ${property.furnishing} furnished.`;

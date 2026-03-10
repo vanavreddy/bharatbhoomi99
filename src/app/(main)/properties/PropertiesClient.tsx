@@ -31,12 +31,12 @@ const BEDROOM_OPTIONS = [
 ];
 
 const BUDGET_OPTIONS = [
-  { label: 'Under ₹10,000', value: '0-10000' },
-  { label: '₹10,000 - ₹20,000', value: '10000-20000' },
-  { label: '₹20,000 - ₹35,000', value: '20000-35000' },
-  { label: '₹35,000 - ₹50,000', value: '35000-50000' },
-  { label: '₹50,000 - ₹75,000', value: '50000-75000' },
-  { label: '₹75,000+', value: '75000-999999' },
+  { label: 'Under ₹25 Lakh', value: '0-2500000' },
+  { label: '₹25L - ₹50 Lakh', value: '2500000-5000000' },
+  { label: '₹50L - ₹1 Crore', value: '5000000-10000000' },
+  { label: '₹1Cr - ₹3 Crore', value: '10000000-30000000' },
+  { label: '₹3Cr - ₹5 Crore', value: '30000000-50000000' },
+  { label: '₹5 Crore+', value: '50000000-999999999' },
 ];
 
 const SORT_OPTIONS = [
@@ -313,7 +313,7 @@ function PropertiesContent() {
 
               {/* Budget Filter */}
               <div className="py-4 border-t border-gray-100">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Budget (per month)</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Budget</h3>
                 <div className="space-y-2">
                   {BUDGET_OPTIONS.map((b) => (
                     <label key={b.value} className="flex items-center gap-2 cursor-pointer">

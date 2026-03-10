@@ -46,8 +46,7 @@ const VALIDATION = {
   area: { min: 1, max: 1000000 },
   bedrooms: { min: 0, max: 20 },
   bathrooms: { min: 1, max: 20 },
-  rent: { min: 1, max: 10000000 },
-  deposit: { min: 0, max: 10000000 },
+  price: { min: 1, max: 1000000000 },
   address: { min: 5, max: 50 },
   city: { min: 2, max: 50 },
   pincode: { length: 6 },
@@ -63,8 +62,7 @@ interface FormData {
   area: string;
   bedrooms: string;
   bathrooms: string;
-  rent: string;
-  deposit: string;
+  price: string;
   isNegotiable: boolean;
   isFurnished: boolean;
   // Step 2: Location
@@ -100,8 +98,7 @@ const initialFormData: FormData = {
   area: '',
   bedrooms: '',
   bathrooms: '',
-  rent: '',
-  deposit: '',
+  price: '',
   isNegotiable: false,
   isFurnished: false,
   addressLine1: '',
@@ -240,17 +237,11 @@ export default function ListPropertyClient() {
       if (parseInt(formData.bathrooms) > VALIDATION.bathrooms.max) {
         newErrors.bathrooms = `Bathrooms cannot exceed ${VALIDATION.bathrooms.max}`;
       }
-      if (!formData.rent || parseInt(formData.rent) < VALIDATION.rent.min) {
-        newErrors.rent = 'Valid rent amount is required';
+      if (!formData.price || parseInt(formData.price) < VALIDATION.price.min) {
+        newErrors.price = 'Valid price is required';
       }
-      if (parseInt(formData.rent) > VALIDATION.rent.max) {
-        newErrors.rent = `Rent cannot exceed ${VALIDATION.rent.max.toLocaleString()}`;
-      }
-      if (!formData.deposit) {
-        newErrors.deposit = 'Deposit amount is required';
-      }
-      if (parseInt(formData.deposit) > VALIDATION.deposit.max) {
-        newErrors.deposit = `Deposit cannot exceed ${VALIDATION.deposit.max.toLocaleString()}`;
+      if (parseInt(formData.price) > VALIDATION.price.max) {
+        newErrors.price = `Price cannot exceed ${VALIDATION.price.max.toLocaleString()}`;
       }
     }
 
@@ -338,8 +329,7 @@ export default function ListPropertyClient() {
         propertyName: formData.propertyName || `${formData.bedrooms} BHK ${formData.category}`,
         bedrooms: parseInt(formData.bedrooms, 10),
         bathrooms: parseInt(formData.bathrooms, 10),
-        rent: parseInt(formData.rent, 10),
-        deposit: parseInt(formData.deposit, 10),
+        price: parseInt(formData.price, 10),
         area: parseInt(formData.area, 10),
         isNegotiable: formData.isNegotiable,
         isFurnished: formData.isFurnished,
@@ -457,7 +447,7 @@ export default function ListPropertyClient() {
             List Your Property
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Reach thousands of potential tenants. Free listing, no brokerage.
+            Reach thousands of potential buyers. Free listing, no brokerage.
           </p>
         </div>
 
@@ -592,39 +582,24 @@ export default function ListPropertyClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Expected Rent (per month)"
-                    name="rent"
-                    type="number"
-                    value={formData.rent}
-                    onChange={handleChange}
-                    placeholder="e.g., 25000"
-                    min={VALIDATION.rent.min}
-                    max={VALIDATION.rent.max}
-                    required
-                    hint="In Indian Rupees"
-                    error={errors.rent}
-                  />
-                  <Input
-                    label="Security Deposit"
-                    name="deposit"
-                    type="number"
-                    value={formData.deposit}
-                    onChange={handleChange}
-                    placeholder="e.g., 50000"
-                    min={0}
-                    max={VALIDATION.deposit.max}
-                    required
-                    hint="Usually 2-3 months rent"
-                    error={errors.deposit}
-                  />
-                </div>
+                <Input
+                  label="Expected Price"
+                  name="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="e.g., 5000000"
+                  min={VALIDATION.price.min}
+                  max={VALIDATION.price.max}
+                  required
+                  hint="In Indian Rupees"
+                  error={errors.price}
+                />
 
                 <div className="flex flex-wrap gap-6">
                   <Checkbox
                     name="isNegotiable"
-                    label="Rent is Negotiable"
+                    label="Price is Negotiable"
                     checked={formData.isNegotiable}
                     onChange={handleChange}
                   />
@@ -851,12 +826,8 @@ export default function ListPropertyClient() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
                     <div>
-                      <p className="text-sm text-gray-500">Rent</p>
-                      <p className="font-semibold">₹{parseInt(formData.rent).toLocaleString('en-IN')}/month</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Deposit</p>
-                      <p className="font-semibold">₹{parseInt(formData.deposit).toLocaleString('en-IN')}</p>
+                      <p className="text-sm text-gray-500">Price</p>
+                      <p className="font-semibold">₹{parseInt(formData.price).toLocaleString('en-IN')}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Area</p>

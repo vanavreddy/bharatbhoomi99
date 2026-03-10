@@ -50,7 +50,7 @@ const steps = [
     id: 4,
     icon: Key,
     title: 'Move In',
-    description: 'Complete rental agreement hassle-free and move into your new home with confidence.',
+    description: 'Complete the purchase agreement hassle-free and move into your new home with confidence.',
     features: ['Digital agreements', 'Secure payments', 'Move-in support'],
     gradient: 'from-orange-500 to-amber-400',
     bgGradient: 'from-orange-50 to-amber-50',
@@ -79,8 +79,8 @@ const stats = [
   {
     icon: Users,
     value: '50K+',
-    label: 'Happy Tenants',
-    description: 'Trusted by thousands of renters',
+    label: 'Happy Customers',
+    description: 'Trusted by thousands of buyers',
   },
 ];
 
@@ -101,7 +101,7 @@ export function HowItWorks() {
             <span className="block text-brand-primary">Perfect Home</span>
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
-            We've simplified the rental process so you can focus on what matters most — finding your ideal living space.
+            We've simplified the buying process so you can focus on what matters most — finding your ideal living space.
           </p>
         </div>
 

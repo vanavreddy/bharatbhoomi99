@@ -90,9 +90,6 @@ export function PropertyCard({ property, className, priority = false, variant = 
                     <span className="text-xl font-bold text-gray-900">
                       {formatPrice(property.price)}
                     </span>
-                    {property.listingType === 'rent' && (
-                      <span className="text-sm text-gray-500">/month</span>
-                    )}
                   </div>
 
                   {/* Title */}
@@ -205,7 +202,7 @@ export function PropertyCard({ property, className, priority = false, variant = 
                 </span>
               )}
               <span className="px-2 py-0.5 bg-brand-primary text-white text-xs font-medium rounded">
-                {property.listingType === 'rent' ? 'Rent' : 'Sale'}
+                Sale
               </span>
             </div>
 
@@ -234,9 +231,6 @@ export function PropertyCard({ property, className, priority = false, variant = 
               <span className="text-lg font-bold text-gray-900">
                 {formatPrice(property.price)}
               </span>
-              {property.listingType === 'rent' && (
-                <span className="text-xs text-gray-500">/month</span>
-              )}
             </div>
 
             {/* Title */}

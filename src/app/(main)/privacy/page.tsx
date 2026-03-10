@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             <section>
               <p>
                 Bharat Bhoomi-99 (&quot;we&quot;, &quot;us&quot;, or &quot;the Platform&quot;), operated by Madhu Chandra,
-                is a rental property listing and real estate intermediary platform accessible at{' '}
+                is a property listing and real estate intermediary platform accessible at{' '}
                 <span className="text-brand-primary">bharatbhoomi99.com</span>. This Privacy Policy
                 explains how we collect, use, store, disclose, and protect your personal data in
                 compliance with the Digital Personal Data Protection Act, 2023 (&quot;DPDPA&quot;), the
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
               <p>We collect and process your personal data for the following specific purposes:</p>
               <ul className="list-disc list-inside space-y-1 mt-2 ml-2">
                 <li><strong>Account Management:</strong> To create and manage your user account, verify your identity via OTP or email, and maintain session security</li>
-                <li><strong>Service Delivery:</strong> To display property listings, facilitate contact between property owners and prospective tenants/buyers, and process property inquiries</li>
+                <li><strong>Service Delivery:</strong> To display property listings, facilitate contact between property owners and prospective buyers, and process property inquiries</li>
                 <li><strong>Communication:</strong> To send property recommendations, service updates, and respond to support requests</li>
                 <li><strong>Platform Improvement:</strong> To analyse usage patterns, improve search relevance, and enhance user experience</li>
                 <li><strong>Legal Compliance:</strong> To comply with applicable laws, regulations, and legal proceedings</li>

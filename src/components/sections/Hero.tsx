@@ -12,14 +12,12 @@ import {
   Search,
   MapPin,
   Building2,
-  Home,
   Briefcase,
   ChevronRight,
   ArrowRight,
 } from 'lucide-react';
 
 const listingTabs = [
-  { id: 'rent', label: 'Rent', icon: Home },
   { id: 'buy', label: 'Buy', icon: Building2 },
   { id: 'commercial', label: 'Commercial', icon: Briefcase },
 ];
@@ -74,7 +72,7 @@ const propertyTypes = [
 export function Hero() {
   const router = useRouter();
   const { activeBuilders } = useBuilders();
-  const [activeTab, setActiveTab] = useState('rent');
+  const [activeTab, setActiveTab] = useState('buy');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
@@ -102,7 +100,6 @@ export function Hero() {
   // Generate dynamic search context text
   const getSearchContext = () => {
     const tabLabels: Record<string, string> = {
-      rent: 'Rent',
       buy: 'Buy',
       commercial: 'Commercial Space',
     };
@@ -191,7 +188,7 @@ export function Hero() {
               Find a home you&apos;ll love
             </h1>
             <p className="text-gray-600 text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
-              Discover rental properties across India with verified listings and transparent pricing
+              Discover properties for sale across India with verified listings and transparent pricing
             </p>
           </div>
 
@@ -342,7 +339,7 @@ export function Hero() {
             </div>
             <div className="text-center p-3 sm:p-4 bg-white/50 rounded-xl">
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-primary">50K+</div>
-              <div className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Happy Tenants</div>
+              <div className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Happy Customers</div>
             </div>
             <div className="text-center p-3 sm:p-4 bg-white/50 rounded-xl">
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-primary">100%</div>

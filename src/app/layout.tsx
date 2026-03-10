@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     locale: SITE_CONFIG.locale,
     url: SITE_CONFIG.url,
     siteName: SITE_CONFIG.name,
-    title: `${SITE_CONFIG.name} | Find Your Perfect Rental Property in India`,
+    title: `${SITE_CONFIG.name} | Find Your Perfect Property in India`,
     description: SITE_CONFIG.description,
     images: [
       {

@@ -10,7 +10,7 @@ export const propertyTypeSchema = z.enum([
   'pg',
 ]);
 
-export const listingTypeSchema = z.enum(['rent', 'sale', 'lease']);
+export const listingTypeSchema = z.enum(['sale']);
 
 export const furnishingSchema = z.enum(['furnished', 'semi-furnished', 'unfurnished']);
 
@@ -35,8 +35,6 @@ export const createPropertySchema = z.object({
   type: propertyTypeSchema,
   listingType: listingTypeSchema,
   price: priceSchema,
-  priceUnit: z.enum(['month', 'year', 'total']),
-  securityDeposit: priceSchema.optional(),
   area: areaSchema,
   bedrooms: z.number().min(0).max(20),
   bathrooms: z.number().min(1).max(20),

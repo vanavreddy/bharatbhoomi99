@@ -6,7 +6,7 @@ export const SITE_CONFIG = {
   name: 'Bharat Bhoomi-99',
   tagline: 'Real Estate | Builders | Construction',
   description:
-    'Discover thousands of rental properties across India. Find apartments, houses, villas, and commercial spaces. Verified listings, transparent pricing, and trusted owners.',
+    'Discover thousands of properties for sale across India. Find apartments, houses, villas, and commercial spaces. Verified listings, transparent pricing, and trusted owners.',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://bharatbhoomi99.com',
   ogImage: '/images/og/default.jpg',
   twitterHandle: '@bharatbhoomi99',
@@ -15,28 +15,28 @@ export const SITE_CONFIG = {
 } as const;
 
 export const DEFAULT_KEYWORDS = [
-  'property rental India',
-  'flats for rent',
-  'houses for rent',
-  'rental properties',
-  'apartments for rent',
+  'property for sale India',
+  'flats for sale',
+  'houses for sale',
+  'buy property India',
+  'apartments for sale',
   'Bharat Bhoomi',
   'real estate India',
   'property listing',
-  'rent house India',
+  'buy house India',
   'Bangalore real estate',
   'family realtor',
   'Chandapura real estate',
   'Dommasandra property',
   'Electronic City homes',
   'Kommasandra property',
-  'property buy sell rent Bangalore',
+  'property buy sell Bangalore',
   'Bangalore builders',
   'real estate agent Bangalore',
 ] as const;
 
 export const PAGE_TITLES = {
-  home: 'Find Your Perfect Rental Property in India',
+  home: 'Find Your Perfect Property in India',
   properties: 'Browse Properties',
   listProperty: 'List Your Property',
   contact: 'Contact Us',
@@ -52,13 +52,13 @@ export const PAGE_TITLES = {
 } as const;
 
 export const PAGE_DESCRIPTIONS = {
-  home: 'Discover thousands of rental properties across India. Find apartments, houses, villas, and commercial spaces. Verified listings, transparent pricing, and trusted owners.',
+  home: 'Discover thousands of properties for sale across India. Find apartments, houses, villas, and commercial spaces. Verified listings, transparent pricing, and trusted owners.',
   properties:
-    'Search and filter through our extensive collection of rental properties. Apartments, houses, villas, and commercial spaces available across all major Indian cities.',
+    'Search and filter through our extensive collection of properties for sale. Apartments, houses, villas, and commercial spaces available across all major Indian cities.',
   listProperty:
-    "List your property for rent on Bharat Bhoomi-99. Reach thousands of potential tenants. Free listing, verified tenants, and hassle-free process.",
+    "List your property for sale on Bharat Bhoomi-99. Reach thousands of potential buyers. Free listing, verified buyers, and hassle-free process.",
   contact:
-    "Get in touch with Bharat Bhoomi-99. We're here to help with your property rental needs. Reach out for support, inquiries, or feedback.",
+    "Get in touch with Bharat Bhoomi-99. We're here to help with your property needs. Reach out for support, inquiries, or feedback.",
   about:
     'Learn about Bharat Bhoomi-99 and Madhu Chandra, your trusted family realtor in Bangalore with over 5 years of experience in real estate, construction, and builders.',
   signIn: 'Sign in to your Bharat Bhoomi-99 account to manage your properties and saved listings.',

@@ -44,8 +44,7 @@ export interface CreatePropertyInput {
   propertyName: string;
   bedrooms: number;
   bathrooms: number;
-  rent: number;
-  deposit: number;
+  price: number;
   area: number;
   isNegotiable?: boolean;
   isFurnished?: boolean;
@@ -75,7 +74,7 @@ export interface CreatePropertyResult {
 // Available filter options
 export interface FilterOptions {
   bedrooms: string[];
-  rent: string[];
+  price: string[];
   area: string[];
   parking: string[];
   water: string[];
@@ -291,8 +290,8 @@ class PropertyService implements IPropertyService {
       PropertyName: input.propertyName.substring(0, 100),
       BedRooms: String(input.bedrooms),
       Baths: String(input.bathrooms),
-      Rent: String(input.rent),
-      Deposit: String(input.deposit),
+      Rent: String(input.price),
+      Deposit: '0',
       IsNegotiable: String(input.isNegotiable || false),
       Area: String(input.area),
       IsFurnished: String(input.isFurnished || false),
@@ -395,7 +394,7 @@ class PropertyService implements IPropertyService {
 
     const options: FilterOptions = {
       bedrooms: [],
-      rent: [],
+      price: [],
       area: [],
       parking: [],
       water: [],
@@ -407,7 +406,7 @@ class PropertyService implements IPropertyService {
       if (key === 'bedrooms' || key === 'bedroom') {
         options.bedrooms = filter.values;
       } else if (key === 'rent') {
-        options.rent = filter.values;
+        options.price = filter.values;
       } else if (key === 'area') {
         options.area = filter.values;
       } else if (key === 'parking') {

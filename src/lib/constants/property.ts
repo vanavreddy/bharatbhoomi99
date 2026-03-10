@@ -13,9 +13,7 @@ export const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
 ];
 
 export const LISTING_TYPES: { value: ListingType; label: string }[] = [
-  { value: 'rent', label: 'For Rent' },
   { value: 'sale', label: 'For Sale' },
-  { value: 'lease', label: 'For Lease' },
 ];
 
 export const FURNISHING_OPTIONS: { value: FurnishingStatus; label: string }[] = [
@@ -33,11 +31,11 @@ export const BEDROOM_OPTIONS = [
 ];
 
 export const PRICE_RANGES = [
-  { min: 0, max: 10000, label: 'Under 10K' },
-  { min: 10000, max: 20000, label: '10K - 20K' },
-  { min: 20000, max: 50000, label: '20K - 50K' },
-  { min: 50000, max: 100000, label: '50K - 1L' },
-  { min: 100000, max: null, label: 'Above 1L' },
+  { min: 0, max: 2500000, label: 'Under 25L' },
+  { min: 2500000, max: 5000000, label: '25L - 50L' },
+  { min: 5000000, max: 10000000, label: '50L - 1Cr' },
+  { min: 10000000, max: 50000000, label: '1Cr - 5Cr' },
+  { min: 50000000, max: null, label: 'Above 5Cr' },
 ];
 
 export const SORT_OPTIONS = [

@@ -39,7 +39,6 @@ export const API_ROUTES = {
 
 export const NAV_ITEMS = [
   { label: 'Buy', href: `${ROUTES.PROPERTIES}?type=buy` },
-  { label: 'Rent', href: `${ROUTES.PROPERTIES}?type=rent` },
   { label: 'Commercial', href: `${ROUTES.PROPERTIES}?type=commercial` },
   { label: 'About', href: ROUTES.ABOUT },
 ] as const;

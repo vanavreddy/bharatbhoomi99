@@ -471,7 +471,7 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
                     <Badge variant="accent" size="lg">Featured</Badge>
                   )}
                   <Badge variant="primary" size="lg">
-                    For {property.listingType === 'rent' ? 'Rent' : property.listingType === 'sale' ? 'Sale' : 'Lease'}
+                    For Sale
                   </Badge>
                 </div>
               </div>
@@ -495,17 +495,7 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
                   <div className="text-right flex-shrink-0">
                     <div className="text-2xl md:text-3xl font-bold text-brand-primary">
                       {formatPrice(property.price)}
-                      {property.listingType === 'rent' && (
-                        <span className="text-base font-normal text-gray-500">
-                          /{property.priceUnit === 'month' ? 'mo' : 'yr'}
-                        </span>
-                      )}
                     </div>
-                    {property.securityDeposit && (
-                      <p className="text-sm text-gray-500">
-                        Deposit: {formatPrice(property.securityDeposit)}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>

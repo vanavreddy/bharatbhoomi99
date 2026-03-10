@@ -26,7 +26,7 @@ export function CTASection() {
             </h2>
 
             <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto">
-              Join thousands of happy tenants who found their dream rental through Bharat Bhoomi-99.
+              Join thousands of happy customers who found their dream property through Bharat Bhoomi-99.
               Start your search today!
             </p>
 

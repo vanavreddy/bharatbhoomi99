@@ -187,7 +187,6 @@ function mapAmenities(
 export function mapPropertyFromListItem(item: ExternalPropertyListItem): Property {
   // Numbers come directly from API (no parsing needed)
   const rent = ensureNumber(item.rent);
-  const deposit = ensureNumber(item.deposit);
   const area = ensureNumber(item.area);
 
   // Strings need parsing to numbers
@@ -204,10 +203,8 @@ export function mapPropertyFromListItem(item: ExternalPropertyListItem): Propert
     description: cleanString(item.comments),
     type: mapPropertyType(item.type, item.category),
     status: 'available',
-    listingType: 'rent',
+    listingType: 'sale',
     price: rent,
-    priceUnit: 'month',
-    securityDeposit: deposit > 0 ? deposit : undefined,
     area,
     bedrooms,
     bathrooms,
@@ -236,7 +233,6 @@ export function mapPropertyFromDetail(response: ExternalPropertyDetail): Propert
 
   // Numbers from detail API
   const rent = ensureNumber(info.rent);
-  const deposit = ensureNumber(info.deposit);
   const area = ensureNumber(info.area);
 
   // Strings need parsing to numbers
@@ -258,10 +254,8 @@ export function mapPropertyFromDetail(response: ExternalPropertyDetail): Propert
     description: cleanString(info.comments),
     type: mapPropertyType(info.type ?? null, info.category ?? null),
     status: 'available',
-    listingType: 'rent',
+    listingType: 'sale',
     price: rent,
-    priceUnit: 'month',
-    securityDeposit: deposit > 0 ? deposit : undefined,
     area,
     bedrooms,
     bathrooms,

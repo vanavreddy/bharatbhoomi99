@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/layout';
 import { SITE_CONFIG } from '@/lib/constants/seo';
 
-const termsDescription = 'Terms of Service for Bharat Bhoomi-99. Read our terms and conditions governing the use of our rental property listing platform, in compliance with Indian law.';
+const termsDescription = 'Terms of Service for Bharat Bhoomi-99. Read our terms and conditions governing the use of our property listing platform, in compliance with Indian law.';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
@@ -67,8 +67,8 @@ export default function TermsPage() {
               <p>
                 Bharat Bhoomi-99 is an <strong>intermediary</strong> within the meaning of Section 2(1)(w)
                 of the Information Technology Act, 2000 (&quot;IT Act&quot;). The Platform provides an
-                online marketplace that facilitates connections between property owners, buyers, and
-                tenants. We do not own, manage, develop, construct, or control any property listed on the
+                online marketplace that facilitates connections between property owners and
+                buyers. We do not own, manage, develop, construct, or control any property listed on the
                 Platform.
               </p>
               <ul className="list-disc list-inside space-y-2 mt-3 ml-2">

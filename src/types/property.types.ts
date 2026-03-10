@@ -4,11 +4,11 @@
 
 export type PropertyType = 'apartment' | 'house' | 'villa' | 'plot' | 'commercial' | 'pg';
 
-export type PropertyStatus = 'available' | 'rented' | 'sold' | 'pending';
+export type PropertyStatus = 'available' | 'sold' | 'pending';
 
 export type FurnishingStatus = 'furnished' | 'semi-furnished' | 'unfurnished';
 
-export type ListingType = 'rent' | 'sale' | 'lease';
+export type ListingType = 'sale';
 
 export interface GeoLocation {
   readonly latitude: number;
@@ -60,8 +60,6 @@ export interface Property {
   readonly status: PropertyStatus;
   readonly listingType: ListingType;
   readonly price: number;
-  readonly priceUnit: 'month' | 'year' | 'total';
-  readonly securityDeposit?: number;
   readonly area: number;
   readonly bedrooms: number;
   readonly bathrooms: number;
@@ -88,8 +86,6 @@ export interface PropertyFormData {
   type: PropertyType;
   listingType: ListingType;
   price: number;
-  priceUnit: 'month' | 'year' | 'total';
-  securityDeposit?: number;
   area: number;
   bedrooms: number;
   bathrooms: number;

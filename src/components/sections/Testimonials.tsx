@@ -21,7 +21,7 @@ const testimonials = [
     role: 'Business Owner',
     location: 'Mumbai',
     rating: 5,
-    text: 'As a property owner, listing my properties here has been incredibly easy. The tenant inquiries are genuine, and the process is completely transparent.',
+    text: 'As a property owner, listing my properties here has been incredibly easy. The buyer inquiries are genuine, and the process is completely transparent.',
   },
   {
     id: 3,
@@ -44,7 +44,7 @@ export function Testimonials() {
             What Our Users Say
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Join thousands of happy tenants and property owners who found their perfect match.
+            Join thousands of happy customers and property owners who found their perfect match.
           </p>
         </div>
 

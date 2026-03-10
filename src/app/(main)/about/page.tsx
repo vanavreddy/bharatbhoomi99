@@ -148,7 +148,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Real Estate</h3>
               <p className="text-sm text-gray-600">
-                Buy, sell, or rent properties across Bangalore. We offer verified listings with
+                Buy or sell properties across Bangalore. We offer verified listings with
                 transparent pricing and hassle-free transactions.
               </p>
             </Card>
