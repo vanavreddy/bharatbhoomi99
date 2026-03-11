@@ -379,9 +379,8 @@ class PropertyService implements IPropertyService {
    * Get available filter options
    */
   async getFilterOptions(): Promise<FilterOptions> {
-    const { data } = await httpClient.post<FiltersResponse>(
-      API_CONFIG.ENDPOINTS.PROPERTY.FILTER_RANGE,
-      {}
+    const { data } = await httpClient.get<FiltersResponse>(
+      API_CONFIG.ENDPOINTS.PROPERTY.FILTER_RANGE
     );
 
     if (!data.success) {

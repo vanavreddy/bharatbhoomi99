@@ -8,7 +8,6 @@ import { Button } from '@/components/ui';
 import { Lock, Mail } from 'lucide-react';
 
 const ADMIN_EMAIL = 'admin@bharatbhoomi99.com';
-const ADMIN_PASSWORD = 'admin123';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -29,34 +28,41 @@ export default function AdminLoginPage() {
     setError('');
     setIsLoading(true);
 
-    // Simulate async
-    await new Promise((r) => setTimeout(r, 500));
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      // Set admin user in localStorage directly
-      const adminUser = {
-        id: 999,
-        email: ADMIN_EMAIL,
-        name: 'Admin',
-        firstName: 'Admin',
-        lastName: null,
-        phone: null,
-        role: 'admin' as const,
-        isVerified: true,
-        isAgent: false,
-        agencyId: null,
-        agencyName: null,
-        createdAt: new Date().toISOString(),
-      };
+      if (res.ok) {
+        // Set admin user in localStorage
+        const adminUser = {
+          id: 999,
+          email: email || ADMIN_EMAIL,
+          name: 'Admin',
+          firstName: 'Admin',
+          lastName: null,
+          phone: null,
+          role: 'admin' as const,
+          isVerified: true,
+          isAgent: false,
+          agencyId: null,
+          agencyName: null,
+          createdAt: new Date().toISOString(),
+        };
 
-      localStorage.setItem('bharatbhoomi_user', JSON.stringify(adminUser));
-      localStorage.setItem('bharatbhoomi_last_login', new Date().toISOString());
-      localStorage.setItem('bharatbhoomi_is_guest', 'false');
+        localStorage.setItem('bharatbhoomi_user', JSON.stringify(adminUser));
+        localStorage.setItem('bharatbhoomi_last_login', new Date().toISOString());
+        localStorage.setItem('bharatbhoomi_is_guest', 'false');
 
-      // Force page reload to pick up new auth state
-      window.location.href = ROUTES.ADMIN;
-    } else {
-      setError('Invalid email or password');
+        window.location.href = ROUTES.ADMIN;
+      } else {
+        setError('Invalid admin credentials');
+        setIsLoading(false);
+      }
+    } catch {
+      setError('Login failed. Please try again.');
       setIsLoading(false);
     }
   };

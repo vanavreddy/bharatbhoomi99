@@ -6,9 +6,12 @@ import Link from 'next/link';
 import { Container } from '@/components/layout';
 import { Button, Badge } from '@/components/ui';
 import { useProperty } from '@/hooks';
+import { useFavorites } from '@/hooks/useFavorites';
 import { useAuth } from '@/contexts';
 import { trackPropertyView } from '@/lib/services/statsService';
 import { LoginPromptModal } from '@/components/modals/LoginPromptModal';
+import { EnquiryModal } from '@/components/modals/EnquiryModal';
+import { HomeTourModal } from '@/components/modals/HomeTourModal';
 import { formatPrice, formatArea, formatDate } from '@/lib/utils/format';
 import { ROUTES } from '@/lib/constants';
 import {
@@ -378,9 +381,26 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
   const { id } = params;
   const { property, isLoading, error, refetch } = useProperty(id);
   const { user, isAuthenticated, isGuest } = useAuth();
+  const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [showTourModal, setShowTourModal] = useState(false);
 
   const isLoggedIn = isAuthenticated && !isGuest;
+  const propertyIdNum = Number(id);
+  const favorited = isFavorited(propertyIdNum);
+
+  const handleFavoriteClick = () => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (favorited) {
+      removeFavorite(propertyIdNum);
+    } else {
+      addFavorite(propertyIdNum);
+    }
+  };
 
   // Track view on mount
   useEffect(() => {
@@ -389,6 +409,16 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
         property.id,
         user ? { id: user.id, phone: user.phone, name: user.name } : undefined
       );
+      // Also track via BB backend (fire and forget)
+      fetch('/api/analytics/property-view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyId: Number(property.id),
+          userId: user?.id || undefined,
+          sessionId: typeof window !== 'undefined' ? sessionStorage.getItem('bb_session_id') || undefined : undefined,
+        }),
+      }).catch(() => {/* silent fail for analytics */});
     }
   }, [property, user]);
 
@@ -451,10 +481,11 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
                 <div className="absolute top-4 right-4 flex gap-2 z-10">
                   <button
                     type="button"
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                    aria-label="Save"
+                    onClick={handleFavoriteClick}
+                    className={`w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform ${favorited ? 'text-red-500' : 'text-gray-600'}`}
+                    aria-label={favorited ? 'Remove from favorites' : 'Save'}
                   >
-                    <Heart className="h-5 w-5 text-gray-600" />
+                    <Heart className="h-5 w-5" fill={favorited ? 'currentColor' : 'none'} />
                   </button>
                   <button
                     type="button"
@@ -695,11 +726,40 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
                 {/* Contact Buttons */}
                 {isLoggedIn ? (
                   <div className="space-y-3">
-                    <Button fullWidth size="lg" leftIcon={<Phone className="h-5 w-5" />}>
+                    <Button
+                      fullWidth
+                      size="lg"
+                      leftIcon={<Phone className="h-5 w-5" />}
+                      onClick={() => {
+                        // Track contact view
+                        if (property && user) {
+                          fetch(`/api/properties/${property.id}/contact-view`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-BB-User-Id': String(user.id) },
+                            body: JSON.stringify({ propertyId: Number(property.id), viewerUserId: user.id, ownerUserId: Number(property.owner.id) }),
+                          }).catch(() => {});
+                        }
+                      }}
+                    >
                       Call Owner
                     </Button>
-                    <Button fullWidth size="lg" variant="outline" leftIcon={<MessageCircle className="h-5 w-5" />}>
+                    <Button
+                      fullWidth
+                      size="lg"
+                      variant="outline"
+                      leftIcon={<MessageCircle className="h-5 w-5" />}
+                      onClick={() => setShowEnquiryModal(true)}
+                    >
                       Send Message
+                    </Button>
+                    <Button
+                      fullWidth
+                      size="lg"
+                      variant="outline"
+                      leftIcon={<Calendar className="h-5 w-5" />}
+                      onClick={() => setShowTourModal(true)}
+                    >
+                      Schedule Tour
                     </Button>
                   </div>
                 ) : (
@@ -758,6 +818,24 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
       />
+      {property && user && (
+        <>
+          <EnquiryModal
+            isOpen={showEnquiryModal}
+            onClose={() => setShowEnquiryModal(false)}
+            propertyId={Number(property.id)}
+            userId={user.id}
+            propertyTitle={property.title}
+          />
+          <HomeTourModal
+            isOpen={showTourModal}
+            onClose={() => setShowTourModal(false)}
+            propertyId={Number(property.id)}
+            userId={user.id}
+            propertyTitle={property.title}
+          />
+        </>
+      )}
     </div>
   );
 }

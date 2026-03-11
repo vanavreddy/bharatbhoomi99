@@ -8,7 +8,7 @@ import { Logo } from './Logo';
 import { Button } from '@/components/ui';
 import { NAV_ITEMS, ROUTES } from '@/lib/constants';
 import { useAuth } from '@/contexts';
-import { Menu, X, Plus, User, ChevronRight, Shield, LogOut } from 'lucide-react';
+import { Menu, X, Plus, User, ChevronRight, Shield, LogOut, Heart, MessageCircle } from 'lucide-react';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -110,7 +110,22 @@ export function Header() {
                   </Button>
                 </>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Link
+                    href={ROUTES.FAVORITES}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
+                    title="Favorites"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href={ROUTES.ENQUIRIES}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
+                    title="Enquiries"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Link>
+                  <div className="h-5 w-px bg-gray-200/60" />
                   <span className="text-sm text-gray-700 font-medium hidden xl:inline">
                     {user?.name || 'User'}
                   </span>
@@ -227,6 +242,39 @@ export function Header() {
 
             {/* Divider */}
             <div className="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+
+            {/* User Links */}
+            {!showAuthButtons && (
+              <>
+                <Link
+                  href={ROUTES.FAVORITES}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
+                >
+                  <span className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
+                      <Heart className="h-4 w-4 text-red-500" />
+                    </div>
+                    Favorites
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </Link>
+                <Link
+                  href={ROUTES.ENQUIRIES}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
+                >
+                  <span className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
+                      <MessageCircle className="h-4 w-4 text-brand-primary" />
+                    </div>
+                    Enquiries
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </Link>
+                <div className="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+              </>
+            )}
 
             {/* Auth Buttons */}
             {showAuthButtons ? (

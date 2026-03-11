@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
 import { SITE_CONFIG, DEFAULT_KEYWORDS, PAGE_TITLES } from '@/lib/constants';
-import { AuthProvider, BuilderProvider } from '@/contexts';
+import { AuthProvider, BuilderProvider, ToastProvider } from '@/contexts';
 import { JsonLd } from '@/components/seo';
 import { getOrganizationSchema, getWebSiteSchema } from '@/lib/seo';
 import './globals.css';
@@ -93,7 +93,9 @@ export default function RootLayout({
       <body className={`${poppins.className} antialiased min-h-screen flex flex-col`}>
         <AuthProvider>
           <BuilderProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </BuilderProvider>
         </AuthProvider>
       </body>

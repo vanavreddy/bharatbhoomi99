@@ -15,9 +15,13 @@ export const ROUTES = {
   MY_PROPERTIES: '/my-properties',
   BUILDERS: '/builders',
   BUILDER_DETAIL: (slug: string) => `/builders/${slug}`,
+  FAVORITES: '/favorites',
+  ENQUIRIES: '/enquiries',
   ADMIN: '/admin',
   ADMIN_LOGIN: '/admin/login',
   ADMIN_BUILDERS: '/admin/builders',
+  ADMIN_PROPERTIES: '/admin/properties',
+  ADMIN_CONTACTS: '/admin/contacts',
 } as const;
 
 export const API_ROUTES = {

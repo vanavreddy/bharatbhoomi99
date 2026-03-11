@@ -10,12 +10,16 @@ import {
   LayoutDashboard,
   Building2,
   LogOut,
-  Home,
+  Home as HomeIcon,
+  FileText,
+  Mail,
 } from 'lucide-react';
 
 const sidebarLinks = [
   { label: 'Dashboard', href: ROUTES.ADMIN, icon: LayoutDashboard },
+  { label: 'Properties', href: ROUTES.ADMIN_PROPERTIES, icon: FileText },
   { label: 'Builders', href: ROUTES.ADMIN_BUILDERS, icon: Building2 },
+  { label: 'Contacts', href: ROUTES.ADMIN_CONTACTS, icon: Mail },
 ];
 
 export default function AdminLayout({
@@ -98,7 +102,7 @@ export default function AdminLayout({
             href={ROUTES.HOME}
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all"
           >
-            <Home className="h-5 w-5" />
+            <HomeIcon className="h-5 w-5" />
             Back to Site
           </Link>
           <button

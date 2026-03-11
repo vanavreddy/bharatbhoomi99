@@ -16,6 +16,12 @@ export type { ApiErrorCode, ApiErrorDetails } from './errors';
 // Services
 export { propertyService, PropertyService } from './services/property.service';
 export { authService, mapMobileUserToUser } from './authService';
+export { contactService } from './services/contact.service';
+export { favoritesService } from './services/favorites.service';
+export { enquiryService } from './services/enquiry.service';
+export { hometourService } from './services/hometour.service';
+export { builderService } from './services/builder.service';
+export { adminService } from './services/admin.service';
 export type {
   IPropertyService,
   PropertyQueryParams,

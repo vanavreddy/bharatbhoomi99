@@ -9,6 +9,10 @@ export { usePropertySearch } from './usePropertySearch';
 export { useCreateProperty } from './useCreateProperty';
 export { useFilterOptions, clearFilterOptionsCache } from './useFilterOptions';
 
+// User data hooks
+export { useFavorites } from './useFavorites';
+export { useEnquiries } from './useEnquiries';
+
 // Utility hooks
 export { useDebounce } from './useDebounce';
 export { useMediaQuery, useIsMobile, useIsTablet, useIsDesktop } from './useMediaQuery';

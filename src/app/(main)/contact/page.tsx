@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/layout';
-import { Button, Input, TextArea, Card } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { JsonLd } from '@/components/seo';
 import { getLocalBusinessSchema } from '@/lib/seo';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '@/lib/constants/seo';
-import { Mail, Phone, MapPin, Clock, Send, MessageSquare, Headphones, Building2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, MessageSquare, Headphones, Building2 } from 'lucide-react';
+import ContactFormClient from './ContactFormClient';
 
 export const metadata: Metadata = {
   title: PAGE_TITLES.contact,
@@ -92,47 +93,7 @@ export default function ContactPage() {
           <div className="lg:col-span-2">
             <Card padding="lg">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Send us a Message</h2>
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Full Name"
-                    name="name"
-                    placeholder="Your name"
-                    required
-                  />
-                  <Input
-                    label="Email Address"
-                    name="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-                <Input
-                  label="Phone Number"
-                  name="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  hint="Optional, but helps us reach you faster"
-                />
-                <Input
-                  label="Subject"
-                  name="subject"
-                  placeholder="What is your inquiry about?"
-                  required
-                />
-                <TextArea
-                  label="Message"
-                  name="message"
-                  placeholder="Tell us how we can help you..."
-                  required
-                  maxLength={1000}
-                  showCount
-                />
-                <Button type="submit" size="lg" leftIcon={<Send className="h-5 w-5" />}>
-                  Send Message
-                </Button>
-              </form>
+              <ContactFormClient />
             </Card>
           </div>
 

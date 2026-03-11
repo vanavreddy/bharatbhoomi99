@@ -10,6 +10,7 @@ import { ROUTES } from '@/lib/constants';
 import { useAuth } from '@/contexts';
 import { trackPropertyView } from '@/lib/services/statsService';
 import { LoginPromptModal } from '@/components/modals/LoginPromptModal';
+import { useFavorites } from '@/hooks/useFavorites';
 import type { Property } from '@/types';
 import {
   MapPin,
@@ -31,8 +32,27 @@ interface PropertyCardProps {
 export function PropertyCard({ property, className, priority = false, variant = 'grid' }: PropertyCardProps) {
   const primaryImage = property.images.find((img) => img.isPrimary) || property.images[0];
   const { user, isAuthenticated, isGuest } = useAuth();
+  const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const router = useRouter();
+
+  const isLoggedIn = isAuthenticated && !isGuest;
+  const propertyIdNum = Number(property.id);
+  const favorited = isFavorited(propertyIdNum);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (favorited) {
+      removeFavorite(propertyIdNum);
+    } else {
+      addFavorite(propertyIdNum);
+    }
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     // Track the view
@@ -126,11 +146,11 @@ export function PropertyCard({ property, className, priority = false, variant = 
                 <div className="flex flex-col gap-2">
                   <button
                     type="button"
-                    onClick={(e) => { e.preventDefault(); }}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                    aria-label="Save"
+                    onClick={handleFavoriteClick}
+                    className={cn('p-2 transition-colors', favorited ? 'text-red-500' : 'text-gray-400 hover:text-red-500')}
+                    aria-label={favorited ? 'Remove from favorites' : 'Save'}
                   >
-                    <Heart className="h-5 w-5" />
+                    <Heart className="h-5 w-5" fill={favorited ? 'currentColor' : 'none'} />
                   </button>
                   <button
                     type="button"
@@ -209,11 +229,11 @@ export function PropertyCard({ property, className, priority = false, variant = 
             {/* Favorite */}
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); }}
-              className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full hover:bg-white transition-colors"
-              aria-label="Save"
+              onClick={handleFavoriteClick}
+              className={cn('absolute top-2 right-2 p-1.5 bg-white/90 rounded-full hover:bg-white transition-colors', favorited ? 'text-red-500' : 'text-gray-600')}
+              aria-label={favorited ? 'Remove from favorites' : 'Save'}
             >
-              <Heart className="h-4 w-4 text-gray-600 hover:text-red-500" />
+              <Heart className="h-4 w-4" fill={favorited ? 'currentColor' : 'none'} />
             </button>
 
             {/* Image count */}
