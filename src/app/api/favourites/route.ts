@@ -66,6 +66,9 @@ export async function DELETE(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get('propertyId');
+    if (!propertyId) {
+      return NextResponse.json({ apiErrors: ['propertyId is required'] }, { status: 400 });
+    }
 
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_FAVORITES.REMOVE}?userId=${userId}&propertyId=${propertyId}`,

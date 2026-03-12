@@ -123,6 +123,7 @@ export interface ExternalBBAdminProperty {
   category: string | null;
   createdOn: string | null;
   oUserID: number | null;
+  ownerName: string | null;
 }
 
 // Admin contact enquiry

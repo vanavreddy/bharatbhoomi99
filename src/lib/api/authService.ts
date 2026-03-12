@@ -1,28 +1,14 @@
 /**
- * Auth Service - Handles authentication API calls
- * Matches React Native app API structure
+ * Auth Service - BB self-contained authentication (email+password)
+ * Replaces OTP-based NK auth with direct BB register/login
  */
 
 import { ApiError } from './errors';
 import type {
-  GenerateOTPRequest,
-  GenerateOTPResponse,
-  ValidateOTPRequest,
-  ValidateOTPResponse,
-  ValidatePasswordResponse,
-  CreateUserRequest,
-  CreateUserResponse,
-  MobileUser,
+  BBAuthResponse,
+  BBApiAuthResponse,
   User,
-  AccountValidationResult,
 } from '@/types/auth.types';
-
-/**
- * Clean phone number - remove non-digit characters
- */
-function cleanPhoneNumber(phone: string): string {
-  return phone.replace(/\D/g, '');
-}
 
 /**
  * Create ApiError with consistent format
@@ -37,185 +23,99 @@ function createAuthError(message: string, status: number = 400, retryable: boole
 }
 
 /**
- * Validate account status
+ * Map BBAuthResponse to simplified User
  */
-function validateAccountStatus(user: MobileUser | null): AccountValidationResult {
-  if (!user) {
-    return { isValid: true };
-  }
-
-  if (user.accountLocked) {
-    return {
-      isValid: false,
-      error: 'Your account has been locked. Please contact support.',
-      errorCode: 'LOCKED',
-    };
-  }
-
-  if (user.accountExpired) {
-    return {
-      isValid: false,
-      error: 'Your account has expired. Please contact support to renew.',
-      errorCode: 'EXPIRED',
-    };
-  }
-
-  if (user.accountActive === false) {
-    return {
-      isValid: false,
-      error: 'Your account is inactive. Please contact support.',
-      errorCode: 'INACTIVE',
-    };
-  }
-
-  return { isValid: true };
+export function mapBBUserToUser(bbUser: BBAuthResponse): User {
+  return {
+    id: bbUser.userId,
+    email: bbUser.email,
+    name: `${bbUser.firstName} ${bbUser.lastName}`.trim(),
+    firstName: bbUser.firstName,
+    lastName: bbUser.lastName,
+    phone: bbUser.phone,
+    role: bbUser.role === 'admin' ? 'admin' : 'user',
+    isVerified: bbUser.isVerified,
+    isAgent: false,
+    agencyId: null,
+    agencyName: null,
+    createdAt: new Date().toISOString(),
+  };
 }
 
 /**
- * Map MobileUser to simplified User
+ * Legacy mapper kept for backward compatibility
  */
-export function mapMobileUserToUser(mobileUser: MobileUser): User {
+export function mapMobileUserToUser(mobileUser: { userId: number; userEmail?: string | null; firstName?: string | null; lastName?: string | null; userPhone?: string | null; isAgent?: boolean | null; isVerified?: boolean | null; agencyId?: number | null; agencyName?: string | null; accountCreatedOn?: string | null; userName?: string | null; middleName?: string | null }): User {
   const fullName = [mobileUser.firstName, mobileUser.middleName, mobileUser.lastName]
     .filter(Boolean)
-    .join(' ') || mobileUser.userName;
+    .join(' ') || mobileUser.userName || '';
 
   return {
     id: mobileUser.userId,
-    email: mobileUser.userEmail,
+    email: mobileUser.userEmail ?? null,
     name: fullName,
-    firstName: mobileUser.firstName,
-    lastName: mobileUser.lastName,
-    phone: mobileUser.userPhone,
+    firstName: mobileUser.firstName ?? null,
+    lastName: mobileUser.lastName ?? null,
+    phone: mobileUser.userPhone ?? null,
     role: mobileUser.isAgent ? 'owner' : 'user',
     isVerified: mobileUser.isVerified ?? false,
     isAgent: mobileUser.isAgent ?? false,
     agencyId: mobileUser.agencyId ?? null,
     agencyName: mobileUser.agencyName ?? null,
-    createdAt: mobileUser.accountCreatedOn,
+    createdAt: mobileUser.accountCreatedOn ?? null,
   };
 }
 
 /**
- * Auth Service
+ * Auth Service - BB self-contained
  */
 export const authService = {
   /**
-   * Generate and send OTP to phone number
+   * Register with email + password
    */
-  async generateOTP(phone: string): Promise<GenerateOTPResponse> {
-    const cleanedPhone = cleanPhoneNumber(phone);
-
-    if (cleanedPhone.length < 10) {
-      throw createAuthError('Invalid phone number. Please enter a valid 10-digit number.', 400);
-    }
-
-    const payload: GenerateOTPRequest = {
-      UserPhone: cleanedPhone,
-      Otp: '',
-    };
-
-    const response = await fetch('/api/auth/generate-otp', {
+  async register(data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }): Promise<BBApiAuthResponse> {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone || undefined,
+      }),
     });
 
     if (!response.ok) {
-      throw ApiError.fromHttpStatus(response.status, 'Failed to send OTP. Please try again.');
+      throw ApiError.fromHttpStatus(response.status, 'Failed to create account. Please try again.');
     }
 
-    const data: GenerateOTPResponse = await response.json();
+    const result: BBApiAuthResponse = await response.json();
 
-    // Check for API errors
-    if (data.apiErrors && data.apiErrors.length > 0) {
-      throw createAuthError(data.apiErrors[0] ?? 'An error occurred', 400);
+    if (result.apiErrors && result.apiErrors.length > 0) {
+      throw createAuthError(result.apiErrors[0] ?? 'Failed to create account.', 409);
     }
 
-    // Validate account status
-    const accountValidation = validateAccountStatus(data.mobileUser);
-    if (!accountValidation.isValid) {
-      throw createAuthError(accountValidation.error ?? 'Account error', 403);
-    }
-
-    // Check if OTP was generated
-    if (!data.model?.otpGenerated) {
-      throw createAuthError('Failed to generate OTP. Please try again.', 400);
-    }
-
-    return data;
+    return result;
   },
 
   /**
-   * Validate OTP
+   * Login with email + password
    */
-  async validateOTP(phone: string, otp: string): Promise<ValidateOTPResponse> {
-    const cleanedPhone = cleanPhoneNumber(phone);
-
-    if (otp.length !== 4) {
-      throw createAuthError('Please enter a valid 4-digit OTP.', 400);
-    }
-
-    const payload: ValidateOTPRequest = {
-      UserPhone: cleanedPhone,
-      Otp: otp,
-    };
-
-    const response = await fetch('/api/auth/validate-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw ApiError.fromHttpStatus(response.status, 'Failed to verify OTP. Please try again.');
-    }
-
-    const data: ValidateOTPResponse = await response.json();
-
-    // Check for API errors
-    if (data.apiErrors && data.apiErrors.length > 0) {
-      throw createAuthError(data.apiErrors[0] ?? 'An error occurred', 400);
-    }
-
-    // Check authorization
-    if (!data.isAuthorized) {
-      throw createAuthError('Invalid OTP. Please try again.', 401);
-    }
-
-    // userId === 0 indicates invalid OTP or new user needs registration
-    if (data.mobileUser && data.mobileUser.userId === 0) {
-      // This is a new user - return the response for further handling
-      return data;
-    }
-
-    // Validate account status for existing users
-    if (data.mobileUser) {
-      const accountValidation = validateAccountStatus(data.mobileUser);
-      if (!accountValidation.isValid) {
-        throw createAuthError(accountValidation.error ?? 'Account error', 403);
-      }
-    }
-
-    return data;
-  },
-
-  /**
-   * Validate email and password
-   */
-  async validatePassword(email: string, password: string): Promise<ValidatePasswordResponse> {
+  async login(email: string, password: string): Promise<BBApiAuthResponse> {
     if (!email || !password) {
       throw createAuthError('Email and password are required.', 400);
     }
 
-    const response = await fetch('/api/auth/validate-password', {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
@@ -226,9 +126,8 @@ export const authService = {
       throw ApiError.fromHttpStatus(response.status, 'Failed to sign in. Please try again.');
     }
 
-    const data: ValidatePasswordResponse = await response.json();
+    const data: BBApiAuthResponse = await response.json();
 
-    // Check for API errors
     if (data.apiErrors && data.apiErrors.length > 0) {
       const errorMessage = (data.apiErrors[0] ?? '').toLowerCase();
       if (errorMessage.includes('not found')) {
@@ -237,67 +136,25 @@ export const authService = {
       throw createAuthError(data.apiErrors[0] ?? 'An error occurred', 400);
     }
 
-    // Check authorization
-    if (!data.isAuthorized) {
-      throw createAuthError('Invalid email or password.', 401);
-    }
-
-    // Validate account status
-    const accountValidation = validateAccountStatus(data.mobileUser);
-    if (!accountValidation.isValid) {
-      throw createAuthError(accountValidation.error ?? 'Account error', 403);
-    }
-
     return data;
   },
 
   /**
-   * Create new user
+   * Validate admin key
    */
-  async createUser(data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    password: string;
-  }): Promise<CreateUserResponse> {
-    const now = new Date().toISOString();
-    const cleanedPhone = cleanPhoneNumber(data.phone);
-
-    const payload: CreateUserRequest = {
-      userPhone: cleanedPhone,
-      userName: data.email,
-      userPassword: data.password,
-      FirstName: data.firstName,
-      LastName: data.lastName,
-      accountCreatedOn: now,
-      accountAccessedOn: now,
-      accountActive: true,
-      accountLocked: false,
-      accountExpired: false,
-      accountClosedOn: '',
-      userEmail: data.email,
-    };
-
-    const response = await fetch('/api/auth/create-user', {
+  async validateAdminKey(adminKey: string): Promise<{ authenticated: boolean }> {
+    const response = await fetch('/api/auth/admin-login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey }),
     });
 
-    if (!response.ok) {
-      throw ApiError.fromHttpStatus(response.status, 'Failed to create account. Please try again.');
+    const data = await response.json();
+
+    if (data.apiErrors && data.apiErrors.length > 0) {
+      throw createAuthError(data.apiErrors[0] ?? 'Invalid admin key', 401);
     }
 
-    const result: CreateUserResponse = await response.json();
-
-    // Check for API errors (e.g. "Email address already exists")
-    if (result.apiErrors && result.apiErrors.length > 0) {
-      throw createAuthError(result.apiErrors[0] ?? 'Failed to create account.', 409);
-    }
-
-    return result;
+    return data.model || { authenticated: false };
   },
 };

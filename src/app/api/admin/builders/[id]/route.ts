@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
 import { bbAdminHeaders } from '@/lib/api/bb-headers';
+import { validateAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 const { BASE_URL, ENDPOINTS } = API_CONFIG;
@@ -9,6 +10,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const authError = validateAdminSession(request);
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const response = await fetch(
@@ -24,9 +28,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const authError = validateAdminSession(request);
+  if (authError) return authError;
+
   try {
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ADMIN.BUILDERS_DELETE(params.id)}`,

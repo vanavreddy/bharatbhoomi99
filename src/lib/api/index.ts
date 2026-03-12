@@ -15,7 +15,7 @@ export type { ApiErrorCode, ApiErrorDetails } from './errors';
 
 // Services
 export { propertyService, PropertyService } from './services/property.service';
-export { authService, mapMobileUserToUser } from './authService';
+export { authService, mapMobileUserToUser, mapBBUserToUser } from './authService';
 export { contactService } from './services/contact.service';
 export { favoritesService } from './services/favorites.service';
 export { enquiryService } from './services/enquiry.service';
@@ -43,4 +43,4 @@ export type {
 } from './types';
 
 // Mappers
-export { mapPropertyFromListItem, mapPropertyFromDetail } from './mappers';
+export { mapPropertyFromListItem, mapPropertyFromDetail, mapPropertyFromBBResponse } from './mappers';

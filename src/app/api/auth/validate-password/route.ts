@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     };
 
     const response = await fetch(
-      `${BASE_URL}${ENDPOINTS.AUTH.VALIDATE_PASSWORD}`,
+      `${BASE_URL}${ENDPOINTS.NK_AUTH.VALIDATE_PASSWORD}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

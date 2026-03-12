@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
 import { bbAdminHeaders } from '@/lib/api/bb-headers';
+import { validateAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 const { BASE_URL, ENDPOINTS } = API_CONFIG;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = validateAdminSession(request);
+  if (authError) return authError;
+
   try {
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ADMIN.CONTACT_ENQUIRIES}`,

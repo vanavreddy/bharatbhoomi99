@@ -348,7 +348,8 @@ export default function ListPropertyClient() {
           zone: formData.zone || undefined,
         },
       },
-      formData.images.length > 0 ? formData.images : undefined
+      formData.images.length > 0 ? formData.images : undefined,
+      user.id
     );
 
     if (result.success) {

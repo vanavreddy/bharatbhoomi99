@@ -186,3 +186,37 @@ export interface AccountValidationResult {
   errorCode?: 'LOCKED' | 'EXPIRED' | 'INACTIVE';
 }
 
+// ============================================
+// BB Self-Contained Auth Types
+// ============================================
+
+export interface BBAuthResponse {
+  readonly userId: number;
+  readonly email: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly phone: string | null;
+  readonly role: string;
+  readonly isVerified: boolean;
+}
+
+export interface BBRegisterRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}
+
+export interface BBLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface BBApiAuthResponse {
+  readonly model: BBAuthResponse | null;
+  readonly isAuthorized: boolean;
+  readonly apiErrors: string[];
+  readonly mobileUser: null;
+}
+

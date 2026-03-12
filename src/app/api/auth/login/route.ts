@@ -1,6 +1,6 @@
 /**
- * Auth API Route - POST /api/auth/create-user
- * Proxies user creation to Azure backend to avoid CORS
+ * Auth API Route - POST /api/auth/login
+ * Proxies BB login to Azure backend
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const response = await fetch(`${BASE_URL}${ENDPOINTS.NK_AUTH.CREATE_USER}`, {
+    const response = await fetch(`${BASE_URL}${ENDPOINTS.AUTH.LOGIN}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error('Error proxying create-user:', error);
+    console.error('Error proxying login:', error);
     return NextResponse.json(
-      { apiErrors: ['Failed to create account. Please try again.'] },
+      { apiErrors: ['Failed to sign in. Please try again.'] },
       { status: 500 }
     );
   }

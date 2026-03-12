@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const {
       page = 1,
       limit = 10,
-      sortField = 'addCreatedOn',
+      sortField = 'createdAt',
       sortOrder = 'desc',
       query,
       filters,

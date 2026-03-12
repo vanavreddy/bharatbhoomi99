@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const response = await fetch(`${BASE_URL}${ENDPOINTS.AUTH.GENERATE_OTP}`, {
+    const response = await fetch(`${BASE_URL}${ENDPOINTS.NK_AUTH.GENERATE_OTP}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

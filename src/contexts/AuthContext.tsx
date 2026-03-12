@@ -8,15 +8,11 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import { authService, mapMobileUserToUser } from '@/lib/api';
+import { authService, mapBBUserToUser } from '@/lib/api';
 import type {
   User,
   AuthState,
-  OTPState,
-  GenerateOTPResponse,
-  ValidateOTPResponse,
-  ValidatePasswordResponse,
-  CreateUserResponse,
+  BBApiAuthResponse,
   SignUpData,
 } from '@/types/auth.types';
 
@@ -56,7 +52,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
+      return { ...state, error: action.payload };
     case 'LOGIN':
       return {
         ...state,
@@ -90,70 +86,19 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 }
 
 // ============================================
-// OTP State Reducer
-// ============================================
-
-type OTPAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'OTP_GENERATED'; payload: string }
-  | { type: 'OTP_VALIDATED' }
-  | { type: 'INCREMENT_RESEND' }
-  | { type: 'RESET' };
-
-const initialOTPState: OTPState = {
-  isGenerated: false,
-  isValidated: false,
-  phone: null,
-  error: null,
-  isLoading: false,
-  resendCount: 0,
-};
-
-function otpReducer(state: OTPState, action: OTPAction): OTPState {
-  switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
-    case 'OTP_GENERATED':
-      return {
-        ...state,
-        isGenerated: true,
-        phone: action.payload,
-        isLoading: false,
-        error: null,
-      };
-    case 'OTP_VALIDATED':
-      return { ...state, isValidated: true, isLoading: false, error: null };
-    case 'INCREMENT_RESEND':
-      return { ...state, resendCount: state.resendCount + 1 };
-    case 'RESET':
-      return initialOTPState;
-    default:
-      return state;
-  }
-}
-
-// ============================================
 // Auth Context
 // ============================================
 
 interface AuthContextValue extends AuthState {
-  // OTP-based authentication
-  generateOTP: (phone: string) => Promise<GenerateOTPResponse>;
-  validateOTP: (phone: string, otp: string) => Promise<ValidateOTPResponse>;
-
-  // Email/Password authentication
-  signInWithEmail: (email: string, password: string) => Promise<ValidatePasswordResponse>;
+  // Email/Password authentication (BB self-contained)
+  signInWithEmail: (email: string, password: string) => Promise<BBApiAuthResponse>;
 
   // User management
-  signUp: (data: SignUpData) => Promise<CreateUserResponse>;
+  signUp: (data: SignUpData) => Promise<BBApiAuthResponse>;
   signOut: () => Promise<void>;
   loginAsGuest: () => void;
 
   // State
-  otpState: OTPState;
   clearError: () => void;
 }
 
@@ -169,7 +114,6 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [authState, dispatchAuth] = useReducer(authReducer, initialAuthState);
-  const [otpState, dispatchOTP] = useReducer(otpReducer, initialOTPState);
 
   // Restore session on mount
   useEffect(() => {
@@ -221,56 +165,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [authState.isAuthenticated, authState.user, authState.lastLogin, authState.isGuest]);
 
-  // Generate OTP
-  const generateOTP = useCallback(async (phone: string): Promise<GenerateOTPResponse> => {
-    dispatchOTP({ type: 'SET_LOADING', payload: true });
-    dispatchOTP({ type: 'SET_ERROR', payload: null });
-
-    try {
-      const response = await authService.generateOTP(phone);
-      dispatchOTP({ type: 'OTP_GENERATED', payload: phone });
-      return response;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to send OTP';
-      dispatchOTP({ type: 'SET_ERROR', payload: message });
-      throw error;
-    }
-  }, []);
-
-  // Validate OTP
-  const validateOTP = useCallback(async (phone: string, otp: string): Promise<ValidateOTPResponse> => {
-    dispatchOTP({ type: 'SET_LOADING', payload: true });
-    dispatchOTP({ type: 'SET_ERROR', payload: null });
-    dispatchAuth({ type: 'SET_ERROR', payload: null });
-
-    try {
-      const response = await authService.validateOTP(phone, otp);
-      dispatchOTP({ type: 'OTP_VALIDATED' });
-
-      // If user exists, log them in
-      if (response.mobileUser && response.mobileUser.userId > 0) {
-        const user = mapMobileUserToUser(response.mobileUser);
-        dispatchAuth({ type: 'LOGIN', payload: { user } });
-      }
-
-      return response;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Invalid OTP';
-      dispatchOTP({ type: 'SET_ERROR', payload: message });
-      throw error;
-    }
-  }, []);
-
-  // Sign in with email
-  const signInWithEmail = useCallback(async (email: string, password: string): Promise<ValidatePasswordResponse> => {
+  // Sign in with email (BB self-contained)
+  const signInWithEmail = useCallback(async (email: string, password: string): Promise<BBApiAuthResponse> => {
     dispatchAuth({ type: 'SET_LOADING', payload: true });
     dispatchAuth({ type: 'SET_ERROR', payload: null });
 
     try {
-      const response = await authService.validatePassword(email, password);
+      const response = await authService.login(email, password);
 
-      if (response.mobileUser) {
-        const user = mapMobileUserToUser(response.mobileUser);
+      if (response.model) {
+        const user = mapBBUserToUser(response.model);
         dispatchAuth({ type: 'LOGIN', payload: { user } });
       }
 
@@ -282,26 +186,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // Sign up
-  const signUp = useCallback(async (data: SignUpData): Promise<CreateUserResponse> => {
+  // Sign up (BB self-contained)
+  const signUp = useCallback(async (data: SignUpData): Promise<BBApiAuthResponse> => {
     dispatchAuth({ type: 'SET_LOADING', payload: true });
     dispatchAuth({ type: 'SET_ERROR', payload: null });
 
     try {
-      const response = await authService.createUser({
+      const response = await authService.register({
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        phone: data.phone,
         password: data.password,
+        phone: data.phone,
       });
 
-      // Auto-login after successful signup using model data
+      // Auto-login after successful signup
       if (response.model) {
-        const user = mapMobileUserToUser(response.model);
+        const user = mapBBUserToUser(response.model);
         dispatchAuth({ type: 'LOGIN', payload: { user } });
       }
-      dispatchOTP({ type: 'RESET' });
 
       return response;
     } catch (error) {
@@ -316,8 +219,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem(STORAGE_KEYS.USER);
     localStorage.removeItem(STORAGE_KEYS.LAST_LOGIN);
     localStorage.removeItem(STORAGE_KEYS.IS_GUEST);
+    // Clear admin session cookie
+    fetch('/api/admin/auth', { method: 'DELETE' }).catch(() => {});
     dispatchAuth({ type: 'LOGOUT' });
-    dispatchOTP({ type: 'RESET' });
   }, []);
 
   // Login as guest
@@ -342,14 +246,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Clear error
   const clearError = useCallback(() => {
     dispatchAuth({ type: 'CLEAR_ERROR' });
-    dispatchOTP({ type: 'SET_ERROR', payload: null });
   }, []);
 
   const value: AuthContextValue = {
     ...authState,
-    otpState,
-    generateOTP,
-    validateOTP,
     signInWithEmail,
     signUp,
     signOut,

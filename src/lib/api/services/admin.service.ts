@@ -18,10 +18,9 @@ import type {
 } from '../bb-types';
 import type { AdminProperty, AdminAnalytics, ContactEnquiry } from '@/types';
 
-// Admin headers for proxy gatekeeper check (proxy injects real key when forwarding)
+// Cookie-based auth — bb_admin_session cookie is sent automatically (same-origin, Path=/api/admin)
 const adminHeaders: Record<string, string> = {
   'Content-Type': 'application/json',
-  'X-BB-Admin-Key': 'admin',
 };
 
 class AdminService {

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
-    const sortField = searchParams.get('sortField') || 'addCreatedOn';
+    const sortField = searchParams.get('sortField') || 'createdAt';
     const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
 
     // Validate pagination params

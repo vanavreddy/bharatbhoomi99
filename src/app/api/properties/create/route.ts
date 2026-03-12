@@ -1,11 +1,13 @@
 /**
  * Create Property API Route - POST /api/properties/create
- * Handles property creation with image uploads via multipart/form-data
+ * Handles property creation with optional image uploads.
+ * - No images: sends JSON to backend (backward compatible)
+ * - With images: sends multipart/form-data to backend
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { propertyService, CreatePropertyInput } from '@/lib/api';
 import { isApiError } from '@/lib/api/errors';
+import { API_CONFIG } from '@/lib/api/config';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -39,23 +41,19 @@ const createPropertySchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get('content-type') || '';
+    const userId = request.headers.get('X-BB-User-Id') || undefined;
 
     let body: unknown;
     let imageFiles: File[] = [];
 
     if (contentType.includes('multipart/form-data')) {
-      // Parse multipart FormData (supports image uploads)
       const formData = await request.formData();
       const dataField = formData.get('data');
       if (typeof dataField === 'string') {
         body = JSON.parse(dataField);
       }
-      // Extract image files
-      imageFiles = formData
-        .getAll('images')
-        .filter((f): f is File => f instanceof File);
+      imageFiles = formData.getAll('images').filter((f): f is File => f instanceof File);
     } else {
-      // Fallback: parse JSON body (no images)
       body = await request.json().catch(() => null);
     }
 
@@ -100,20 +98,78 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const input: CreatePropertyInput = validation.data;
-    const result = await propertyService.createProperty(input, imageFiles.length > 0 ? imageFiles : undefined);
+    const input = validation.data;
 
-    if (!result.success) {
+    // Build the backend request body (maps frontend field names to backend field names)
+    const backendData = {
+      propertyName: input.propertyName,
+      type: input.category || 'apartment',
+      category: input.category || 'apartment',
+      bedRooms: String(input.bedrooms),
+      baths: String(input.bathrooms),
+      rent: input.price,
+      deposit: 0,
+      area: input.area,
+      isNegotiable: input.isNegotiable || false,
+      isFurnished: input.isFurnished || false,
+      comments: input.comments || '',
+      parking: input.parking || 'None',
+      water: input.water || 'Municipal',
+      electricity: input.electricity || 'Available',
+      noOfImages: imageFiles.length,
+      addressLine1: input.address.addressLine1,
+      addressLine2: input.address.addressLine2 || '',
+      city: input.address.city,
+      state: input.address.state,
+      country: input.address.country || 'India',
+      zipCode: input.address.zipCode,
+      zone: input.address.zone || '',
+    };
+
+    const backendUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROPERTY.CREATE}`;
+    const headers: Record<string, string> = {};
+    if (userId) {
+      headers['X-BB-User-Id'] = userId;
+    }
+
+    let response: Response;
+
+    if (imageFiles.length > 0) {
+      // With images: send multipart/form-data
+      const backendFormData = new FormData();
+      backendFormData.append('data', JSON.stringify(backendData));
+      for (const file of imageFiles) {
+        backendFormData.append('images', file);
+      }
+      response = await fetch(backendUrl, {
+        method: 'POST',
+        headers,
+        body: backendFormData,
+      });
+    } else {
+      // No images: send JSON (backward compatible with production backend)
+      headers['Content-Type'] = 'application/json';
+      headers['Accept'] = 'application/json';
+      response = await fetch(backendUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(backendData),
+      });
+    }
+
+    const data = await response.json();
+
+    if (data.apiErrors && data.apiErrors.length > 0) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'SERVER_ERROR',
-            message: result.message,
+            code: data.isAuthorized === false ? 'UNAUTHORIZED' : 'SERVER_ERROR',
+            message: data.apiErrors[0],
           },
           timestamp: new Date().toISOString(),
         },
-        { status: 500 }
+        { status: data.isAuthorized === false ? 401 : 400 }
       );
     }
 
@@ -121,8 +177,9 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         data: {
-          propertyId: result.propertyId,
-          message: result.message,
+          propertyId: data.model?.bbPropertyId,
+          message: 'Property created successfully',
+          imageUrls: data.model?.imageUrls || [],
         },
         timestamp: new Date().toISOString(),
       },

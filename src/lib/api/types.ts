@@ -176,3 +176,92 @@ export interface FiltersResponse {
   success: boolean;
   message: string;
 }
+
+// ============================================
+// BB Self-Contained Property Types
+// ============================================
+
+export interface BBPropertyResponse {
+  bbPropertyId: number;
+  propertyName: string;
+  type: string;
+  category: string | null;
+  bedRooms: string | null;
+  baths: string | null;
+  rent: number;
+  deposit: number;
+  area: number;
+  isNegotiable: boolean;
+  isFurnished: boolean;
+  comments: string | null;
+  parking: string | null;
+  water: string | null;
+  electricity: string | null;
+  noOfImages: number;
+  // Address embedded
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string;
+  state: string | null;
+  country: string | null;
+  zipCode: string | null;
+  zone: string | null;
+  // Metadata
+  status: string;
+  isFeatured: boolean;
+  viewCount: number;
+  builderId: string | null;
+  // Owner
+  ownerUserId: number;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
+  // Images
+  imageUrls: string[];
+  createdAt: string;
+}
+
+export interface BBPropertySearchRequest {
+  query?: string;
+  type?: string;
+  category?: string;
+  city?: string;
+  bedRooms?: string;
+  minRent?: number;
+  maxRent?: number;
+  isFurnished?: boolean;
+  builderId?: string;
+  page: number;
+  limit: number;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+}
+
+export interface BBFilterRangeResponse {
+  categories: string[];
+  bedRooms: string[];
+  cities: string[];
+  types: string[];
+  minRent: number;
+  maxRent: number;
+}
+
+export interface BBPaginatedResponse<T> {
+  model: {
+    data: T[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+  isAuthorized: boolean;
+  apiErrors: string[];
+}
+
+export interface BBSingleResponse<T> {
+  model: T | null;
+  isAuthorized: boolean;
+  apiErrors: string[];
+}

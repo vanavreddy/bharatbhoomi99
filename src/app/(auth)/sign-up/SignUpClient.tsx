@@ -21,7 +21,7 @@ import {
 
 // Password validation rules matching React Native app
 const PASSWORD_RULES = {
-  minLength: 6,
+  minLength: 8,
   requireUppercase: true,
   requireLowercase: true,
   requireDigit: true,
@@ -319,7 +319,7 @@ export default function SignUpClient() {
               error={formErrors.password}
               disabled={isLoading}
               autoComplete="new-password"
-              hint="Min 6 characters with uppercase, lowercase, and number"
+              hint="Min 8 characters with uppercase, lowercase, and number"
               required
             />
             <button

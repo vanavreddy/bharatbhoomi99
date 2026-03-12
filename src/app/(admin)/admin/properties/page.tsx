@@ -35,7 +35,7 @@ export default function AdminPropertiesPage() {
 
   const handleApprove = async (id: number) => {
     try {
-      await adminService.approveProperty(id, 999);
+      await adminService.approveProperty(id, 0);
       showToast('Property approved');
       fetchProperties();
     } catch {
@@ -46,7 +46,7 @@ export default function AdminPropertiesPage() {
   const handleReject = async () => {
     if (!rejectModal || !rejectModal.reason.trim()) return;
     try {
-      await adminService.rejectProperty(rejectModal.id, rejectModal.reason.trim(), 999);
+      await adminService.rejectProperty(rejectModal.id, rejectModal.reason.trim(), 0);
       setRejectModal(null);
       showToast('Property rejected');
       fetchProperties();
@@ -108,6 +108,7 @@ export default function AdminPropertiesPage() {
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-4">ID</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-4">Property</th>
+                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-4">Owner</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-4">Status</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-4">Category</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-4">Views</th>
@@ -118,11 +119,11 @@ export default function AdminPropertiesPage() {
             <tbody className="divide-y divide-gray-100">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}><td colSpan={7} className="px-6 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={8} className="px-6 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse" /></td></tr>
                 ))
               ) : properties.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <Building2 className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500">No properties found</p>
                   </td>
@@ -134,6 +135,7 @@ export default function AdminPropertiesPage() {
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate">
                       {prop.propertyName || 'Unnamed'}
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{prop.ownerName || '-'}</td>
                     <td className="px-6 py-4">{statusBadge(prop.status)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 capitalize">{prop.category || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{prop.viewCount}</td>

@@ -5,7 +5,7 @@
  */
 
 import type { Property, PropertyImage, PropertyOwner, Address, PropertyAmenity } from '@/types/property.types';
-import type { ExternalPropertyListItem, ExternalPropertyDetail, ExternalPropertyOwner } from './types';
+import type { ExternalPropertyListItem, ExternalPropertyDetail, ExternalPropertyOwner, BBPropertyResponse } from './types';
 
 /**
  * Generate a URL-friendly slug from title
@@ -225,6 +225,57 @@ export function mapPropertyFromListItem(item: ExternalPropertyListItem): Propert
  * Map external property detail to internal Property type
  * Strictly typed to match ExternalPropertyDetail interface
  */
+/**
+ * Map BB self-contained property response to internal Property type
+ * Address and metadata are embedded directly in the response
+ */
+export function mapPropertyFromBBResponse(item: BBPropertyResponse): Property {
+  const rent = ensureNumber(item.rent);
+  const area = ensureNumber(item.area);
+  const bedrooms = parseStringToNumber(item.bedRooms, 1);
+  const bathrooms = parseStringToNumber(item.baths, 1);
+  const title = cleanString(item.propertyName, 'Untitled Property');
+
+  return {
+    id: String(item.bbPropertyId),
+    title,
+    slug: generateSlug(title, item.bbPropertyId),
+    description: cleanString(item.comments),
+    type: mapPropertyType(item.type, item.category),
+    status: 'available',
+    listingType: 'sale',
+    price: rent,
+    area,
+    bedrooms,
+    bathrooms,
+    furnishing: mapFurnishingStatus(item.isFurnished),
+    availableFrom: item.createdAt || new Date().toISOString(),
+    address: {
+      street: cleanString(item.addressLine1),
+      locality: cleanString(item.zone),
+      city: cleanString(item.city),
+      state: cleanString(item.state),
+      pincode: cleanString(item.zipCode),
+      landmark: item.addressLine2 ? cleanString(item.addressLine2) : undefined,
+      coordinates: undefined,
+    },
+    amenities: mapAmenities(item.parking, item.water, item.electricity, item.isFurnished),
+    images: mapImages(item.imageUrls || []),
+    owner: {
+      id: String(item.ownerUserId),
+      name: cleanString(item.ownerName, 'Property Owner'),
+      phone: cleanString(item.ownerPhone),
+      email: item.ownerEmail ?? undefined,
+      isVerified: false,
+      avatar: undefined,
+    },
+    isFeatured: item.isFeatured,
+    views: item.viewCount,
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.createdAt || new Date().toISOString(),
+  };
+}
+
 export function mapPropertyFromDetail(response: ExternalPropertyDetail): Property {
   const { propertyInformation: info, address, imageLinks, owner } = response;
 

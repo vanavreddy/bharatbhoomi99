@@ -51,6 +51,7 @@ export interface AdminProperty {
   category: string | null;
   createdOn: string | null;
   oUserID: number | null;
+  ownerName: string | null;
 }
 
 export interface AdminAnalytics {
