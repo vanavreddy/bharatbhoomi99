@@ -125,6 +125,29 @@ export const ELECTRICITY_OPTIONS = [
   { value: 'Inverter', label: 'Inverter Backup' },
 ];
 
+// Facing options for plot/land properties
+export const FACING_OPTIONS = [
+  { value: 'North', label: 'North' },
+  { value: 'South', label: 'South' },
+  { value: 'East', label: 'East' },
+  { value: 'West', label: 'West' },
+  { value: 'NE', label: 'North-East' },
+  { value: 'NW', label: 'North-West' },
+  { value: 'SE', label: 'South-East' },
+  { value: 'SW', label: 'South-West' },
+];
+
+// Plot approval type options
+export const PLOT_APPROVAL_OPTIONS = [
+  { value: 'BDA', label: 'BDA Approved' },
+  { value: 'BBMP', label: 'BBMP Approved' },
+  { value: 'BMRDA', label: 'BMRDA Approved' },
+  { value: 'DTCP', label: 'DTCP Approved' },
+  { value: 'Revenue Site', label: 'Revenue Site' },
+  { value: 'Gramathana', label: 'Gramathana' },
+  { value: 'Other', label: 'Other' },
+];
+
 // Property categories for the API (values match the React Native app / Azure backend)
 export const PROPERTY_CATEGORIES = [
   { value: 'apartment', label: 'Apartment/Flat' },

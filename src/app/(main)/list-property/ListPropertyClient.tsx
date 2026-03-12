@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Container } from '@/components/layout';
 import { Button, Input, Select, TextArea, Checkbox, Card } from '@/components/ui';
 import { useCreateProperty } from '@/hooks';
-import { useAuth } from '@/contexts';
+import { useAuth, useBuilders } from '@/contexts';
 import {
   PROPERTY_CATEGORIES,
   FURNISHING_OPTIONS,
@@ -14,6 +14,8 @@ import {
   PARKING_OPTIONS,
   WATER_OPTIONS,
   ELECTRICITY_OPTIONS,
+  FACING_OPTIONS,
+  PLOT_APPROVAL_OPTIONS,
 } from '@/lib/constants';
 import {
   Upload,
@@ -65,6 +67,13 @@ interface FormData {
   price: string;
   isNegotiable: boolean;
   isFurnished: boolean;
+  furnishing: string;
+  builderId: string;
+  // Land/site fields (for plot category)
+  facing: string;
+  plotLength: string;
+  plotWidth: string;
+  plotApprovalType: string;
   // Step 2: Location
   addressLine1: string;
   addressLine2: string;
@@ -101,6 +110,12 @@ const initialFormData: FormData = {
   price: '',
   isNegotiable: false,
   isFurnished: false,
+  furnishing: 'unfurnished',
+  builderId: '',
+  facing: '',
+  plotLength: '',
+  plotWidth: '',
+  plotApprovalType: '',
   addressLine1: '',
   addressLine2: '',
   city: '',
@@ -118,6 +133,7 @@ const initialFormData: FormData = {
 export default function ListPropertyClient() {
   const router = useRouter();
   const { user, isAuthenticated, isGuest } = useAuth();
+  const { activeBuilders, isLoaded: buildersLoaded } = useBuilders();
   const { createProperty, isCreating, error: apiError, reset } = useCreateProperty();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -126,7 +142,6 @@ export default function ListPropertyClient() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
   const [success, setSuccess] = useState(false);
-  const [createdPropertyId, setCreatedPropertyId] = useState<number | null>(null);
 
   // Handle input changes
   const handleChange = useCallback(
@@ -225,17 +240,19 @@ export default function ListPropertyClient() {
       if (parseInt(formData.area) > VALIDATION.area.max) {
         newErrors.area = `Area cannot exceed ${VALIDATION.area.max.toLocaleString()} sq.ft.`;
       }
-      if (!formData.bedrooms || parseInt(formData.bedrooms) < VALIDATION.bedrooms.min) {
-        newErrors.bedrooms = 'Number of bedrooms is required';
-      }
-      if (parseInt(formData.bedrooms) > VALIDATION.bedrooms.max) {
-        newErrors.bedrooms = `Bedrooms cannot exceed ${VALIDATION.bedrooms.max}`;
-      }
-      if (!formData.bathrooms || parseInt(formData.bathrooms) < VALIDATION.bathrooms.min) {
-        newErrors.bathrooms = 'At least 1 bathroom is required';
-      }
-      if (parseInt(formData.bathrooms) > VALIDATION.bathrooms.max) {
-        newErrors.bathrooms = `Bathrooms cannot exceed ${VALIDATION.bathrooms.max}`;
+      if (formData.category !== 'plot') {
+        if (!formData.bedrooms || parseInt(formData.bedrooms) < VALIDATION.bedrooms.min) {
+          newErrors.bedrooms = 'Number of bedrooms is required';
+        }
+        if (parseInt(formData.bedrooms) > VALIDATION.bedrooms.max) {
+          newErrors.bedrooms = `Bedrooms cannot exceed ${VALIDATION.bedrooms.max}`;
+        }
+        if (!formData.bathrooms || parseInt(formData.bathrooms) < VALIDATION.bathrooms.min) {
+          newErrors.bathrooms = 'At least 1 bathroom is required';
+        }
+        if (parseInt(formData.bathrooms) > VALIDATION.bathrooms.max) {
+          newErrors.bathrooms = `Bathrooms cannot exceed ${VALIDATION.bathrooms.max}`;
+        }
       }
       if (!formData.price || parseInt(formData.price) < VALIDATION.price.min) {
         newErrors.price = 'Valid price is required';
@@ -323,12 +340,17 @@ export default function ListPropertyClient() {
 
     const userEmail = user.email;
 
+    const isPlot = formData.category === 'plot';
+    const defaultName = isPlot
+      ? `Plot in ${formData.city || 'Bangalore'}`
+      : `${formData.bedrooms} BHK ${formData.category}`;
+
     const result = await createProperty(
       {
         userEmail,
-        propertyName: formData.propertyName || `${formData.bedrooms} BHK ${formData.category}`,
-        bedrooms: parseInt(formData.bedrooms, 10),
-        bathrooms: parseInt(formData.bathrooms, 10),
+        propertyName: formData.propertyName || defaultName,
+        bedrooms: isPlot ? 0 : parseInt(formData.bedrooms, 10),
+        bathrooms: isPlot ? 0 : parseInt(formData.bathrooms, 10),
         price: parseInt(formData.price, 10),
         area: parseInt(formData.area, 10),
         isNegotiable: formData.isNegotiable,
@@ -338,6 +360,11 @@ export default function ListPropertyClient() {
         water: formData.water,
         electricity: formData.electricity,
         category: formData.category,
+        builderId: formData.builderId || undefined,
+        facing: formData.facing || undefined,
+        plotLength: formData.plotLength ? parseFloat(formData.plotLength) : undefined,
+        plotWidth: formData.plotWidth ? parseFloat(formData.plotWidth) : undefined,
+        plotApprovalType: formData.plotApprovalType || undefined,
         address: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2 || undefined,
@@ -356,7 +383,6 @@ export default function ListPropertyClient() {
       // Cleanup image previews
       imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
       setSuccess(true);
-      setCreatedPropertyId(result.propertyId || null);
     }
   };
 
@@ -368,7 +394,7 @@ export default function ListPropertyClient() {
           <div className="w-20 h-20 mx-auto mb-6 bg-brand-primary/10 rounded-2xl flex items-center justify-center">
             <Home className="h-10 w-10 text-brand-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">Sign in to List Your Property</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">Sign in to Sell Your Property</h1>
           <p className="text-gray-500 mb-8">
             Create an account or sign in to list your property for free on Bharat Bhoomi 99.
           </p>
@@ -410,27 +436,24 @@ export default function ListPropertyClient() {
         <Container>
           <Card padding="lg" className="max-w-lg mx-auto text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Listed Successfully!</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Submitted for Approval!</h1>
             <p className="text-gray-600 mb-6">
-              Your property has been submitted and will be reviewed shortly.
+              Your property has been submitted for admin review. Track status in My Properties.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {createdPropertyId && (
-                <Button onClick={() => router.push(`/properties/${createdPropertyId}`)}>
-                  View Property
-                </Button>
-              )}
+              <Button onClick={() => router.push('/my-properties')}>
+                Go to My Properties
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => {
                   setSuccess(false);
-                  setCreatedPropertyId(null);
                   setFormData(initialFormData);
                   setCurrentStep(1);
                   setImagePreviews([]);
                 }}
               >
-                List Another Property
+                Sell Another Property
               </Button>
             </div>
           </Card>
@@ -445,7 +468,7 @@ export default function ListPropertyClient() {
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-2">
-            List Your Property
+            Sell Your Property
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Reach thousands of potential buyers. Free listing, no brokerage.
@@ -506,7 +529,7 @@ export default function ListPropertyClient() {
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-red-800">Failed to list property</p>
+                <p className="text-sm font-medium text-red-800">Failed to submit property</p>
                 <p className="text-sm text-red-600">{apiError}</p>
               </div>
             </div>
@@ -541,9 +564,26 @@ export default function ListPropertyClient() {
                   error={errors.category}
                 />
 
+                {!buildersLoaded && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-gray-700">Builder (Optional)</p>
+                    <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
+                  </div>
+                )}
+                {buildersLoaded && activeBuilders.length > 0 && (
+                  <Select
+                    label="Builder (Optional)"
+                    name="builderId"
+                    value={formData.builderId}
+                    onChange={handleChange}
+                    placeholder="Select builder (if applicable)"
+                    options={activeBuilders.map((b) => ({ value: b.id, label: b.name }))}
+                  />
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input
-                    label="Built-up Area (sq.ft.)"
+                    label={formData.category === 'plot' ? 'Plot Area (sq.ft.)' : 'Built-up Area (sq.ft.)'}
                     name="area"
                     type="number"
                     value={formData.area}
@@ -555,33 +595,78 @@ export default function ListPropertyClient() {
                     error={errors.area}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Bedrooms"
-                      name="bedrooms"
-                      type="number"
-                      value={formData.bedrooms}
+                  {formData.category === 'plot' ? (
+                    <Select
+                      label="Facing"
+                      name="facing"
+                      value={formData.facing}
                       onChange={handleChange}
-                      placeholder="e.g., 2"
-                      min={VALIDATION.bedrooms.min}
-                      max={VALIDATION.bedrooms.max}
-                      required
-                      error={errors.bedrooms}
+                      placeholder="Select facing direction"
+                      options={FACING_OPTIONS}
+                      error={errors.facing}
                     />
-                    <Input
-                      label="Bathrooms"
-                      name="bathrooms"
-                      type="number"
-                      value={formData.bathrooms}
-                      onChange={handleChange}
-                      placeholder="e.g., 2"
-                      min={VALIDATION.bathrooms.min}
-                      max={VALIDATION.bathrooms.max}
-                      required
-                      error={errors.bathrooms}
-                    />
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        label="Bedrooms"
+                        name="bedrooms"
+                        type="number"
+                        value={formData.bedrooms}
+                        onChange={handleChange}
+                        placeholder="e.g., 2"
+                        min={VALIDATION.bedrooms.min}
+                        max={VALIDATION.bedrooms.max}
+                        required
+                        error={errors.bedrooms}
+                      />
+                      <Input
+                        label="Bathrooms"
+                        name="bathrooms"
+                        type="number"
+                        value={formData.bathrooms}
+                        onChange={handleChange}
+                        placeholder="e.g., 2"
+                        min={VALIDATION.bathrooms.min}
+                        max={VALIDATION.bathrooms.max}
+                        required
+                        error={errors.bathrooms}
+                      />
+                    </div>
+                  )}
                 </div>
+
+                {formData.category === 'plot' && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Input
+                        label="Plot Length (ft) — Optional"
+                        name="plotLength"
+                        type="number"
+                        value={formData.plotLength}
+                        onChange={handleChange}
+                        placeholder="e.g., 40"
+                        min={0}
+                      />
+                      <Input
+                        label="Plot Width (ft) — Optional"
+                        name="plotWidth"
+                        type="number"
+                        value={formData.plotWidth}
+                        onChange={handleChange}
+                        placeholder="e.g., 60"
+                        min={0}
+                      />
+                    </div>
+                    <Select
+                      label="Approval Type"
+                      name="plotApprovalType"
+                      value={formData.plotApprovalType}
+                      onChange={handleChange}
+                      placeholder="Select approval type"
+                      options={PLOT_APPROVAL_OPTIONS}
+                    />
+                  </>
+                )}
 
                 <Input
                   label="Expected Price"
@@ -616,7 +701,7 @@ export default function ListPropertyClient() {
                   <Select
                     label="Furnishing Level"
                     name="furnishing"
-                    value={formData.isFurnished ? 'furnished' : 'unfurnished'}
+                    value={formData.furnishing}
                     onChange={handleChange}
                     options={FURNISHING_OPTIONS.map((f) => ({ value: f.value, label: f.label }))}
                   />
@@ -810,7 +895,7 @@ export default function ListPropertyClient() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-semibold text-lg text-gray-900">
-                        {formData.propertyName || `${formData.bedrooms} BHK ${formData.category}`}
+                        {formData.propertyName || (formData.category === 'plot' ? `Plot in ${formData.city || 'Bangalore'}` : `${formData.bedrooms} BHK ${formData.category}`)}
                       </h3>
                       <p className="text-gray-600">
                         {formData.addressLine1}, {formData.city}, {formData.state} - {formData.pincode}
@@ -835,9 +920,22 @@ export default function ListPropertyClient() {
                       <p className="font-semibold">{parseInt(formData.area).toLocaleString('en-IN')} sq.ft.</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Configuration</p>
-                      <p className="font-semibold">{formData.bedrooms} BHK, {formData.bathrooms} Bath</p>
+                      <p className="text-sm text-gray-500">
+                        {formData.category === 'plot' ? 'Facing' : 'Configuration'}
+                      </p>
+                      <p className="font-semibold">
+                        {formData.category === 'plot'
+                          ? (formData.facing || 'Not specified')
+                          : `${formData.bedrooms} BHK, ${formData.bathrooms} Bath`
+                        }
+                      </p>
                     </div>
+                    {formData.category === 'plot' && formData.plotApprovalType && (
+                      <div>
+                        <p className="text-sm text-gray-500">Approval</p>
+                        <p className="font-semibold">{formData.plotApprovalType}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
@@ -935,12 +1033,12 @@ export default function ListPropertyClient() {
                   {isCreating ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                      Creating Listing...
+                      Submitting...
                     </>
                   ) : (
                     <>
                       <Plus className="h-5 w-5 mr-2" />
-                      List Property
+                      Submit Request
                     </>
                   )}
                 </Button>

@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 // Validation schema for property creation
 const createPropertySchema = z.object({
   userEmail: z.string().email('Valid email is required'),
-  propertyName: z.string().min(3, 'Property name must be at least 3 characters'),
+  propertyName: z.string().min(1, 'Property name is required'),
   bedrooms: z.number().int().min(0).max(20),
   bathrooms: z.number().int().min(0).max(10),
   price: z.number().positive('Price must be positive'),
@@ -27,6 +27,11 @@ const createPropertySchema = z.object({
   water: z.string().optional(),
   electricity: z.string().optional(),
   category: z.string().optional(),
+  builderId: z.string().optional(),
+  facing: z.string().optional(),
+  plotLength: z.number().min(0, 'Plot length cannot be negative').optional(),
+  plotWidth: z.number().min(0, 'Plot width cannot be negative').optional(),
+  plotApprovalType: z.string().optional(),
   address: z.object({
     addressLine1: z.string().min(1, 'Address is required'),
     addressLine2: z.string().optional(),
@@ -124,6 +129,11 @@ export async function POST(request: NextRequest) {
       country: input.address.country || 'India',
       zipCode: input.address.zipCode,
       zone: input.address.zone || '',
+      builderId: input.builderId || null,
+      facing: input.facing || null,
+      plotLength: input.plotLength || null,
+      plotWidth: input.plotWidth || null,
+      plotApprovalType: input.plotApprovalType || null,
     };
 
     const backendUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROPERTY.CREATE}`;
@@ -155,6 +165,26 @@ export async function POST(request: NextRequest) {
         headers,
         body: JSON.stringify(backendData),
       });
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let message = 'Backend error';
+      try {
+        const errorJson = JSON.parse(errorText);
+        message = errorJson.apiErrors?.[0] || errorJson.message || message;
+      } catch {
+        // Backend returned non-JSON (e.g. HTML error page)
+        message = `Backend returned status ${response.status}`;
+      }
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'SERVER_ERROR', message },
+          timestamp: new Date().toISOString(),
+        },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();

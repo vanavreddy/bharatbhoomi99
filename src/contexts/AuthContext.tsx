@@ -176,12 +176,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.model) {
         const user = mapBBUserToUser(response.model);
         dispatchAuth({ type: 'LOGIN', payload: { user } });
+      } else {
+        dispatchAuth({ type: 'SET_LOADING', payload: false });
       }
 
       return response;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign in failed';
       dispatchAuth({ type: 'SET_ERROR', payload: message });
+      dispatchAuth({ type: 'SET_LOADING', payload: false });
       throw error;
     }
   }, []);
@@ -210,6 +213,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign up failed';
       dispatchAuth({ type: 'SET_ERROR', payload: message });
+      dispatchAuth({ type: 'SET_LOADING', payload: false });
       throw error;
     }
   }, []);

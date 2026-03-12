@@ -77,7 +77,7 @@ export function Header() {
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
               >
                 <Plus className="h-4 w-4" />
-                <span className="hidden xl:inline">Post Property</span>
+                <span className="hidden xl:inline">Sell Property</span>
                 <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-green-100 text-green-700 rounded-full">
                   FREE
                 </span>
@@ -205,7 +205,7 @@ export function Header() {
             {/* Divider */}
             <div className="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
-            {/* Post Property */}
+            {/* Sell Property */}
             <Link
               href={ROUTES.LIST_PROPERTY}
               onClick={() => setIsMobileMenuOpen(false)}
@@ -215,7 +215,7 @@ export function Header() {
                 <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
                   <Plus className="h-4 w-4 text-brand-primary" />
                 </div>
-                Post Property
+                Sell Property
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-green-100 text-green-700 rounded-full">
                   FREE
                 </span>

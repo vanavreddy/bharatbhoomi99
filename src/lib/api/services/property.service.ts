@@ -54,6 +54,11 @@ export interface CreatePropertyInput {
   water?: string;
   electricity?: string;
   category?: string;
+  builderId?: string;
+  facing?: string;
+  plotLength?: number;
+  plotWidth?: number;
+  plotApprovalType?: string;
   address: {
     addressLine1: string;
     addressLine2?: string;
@@ -270,6 +275,11 @@ class PropertyService implements IPropertyService {
       country: input.address.country || 'India',
       zipCode: input.address.zipCode,
       zone: input.address.zone || '',
+      builderId: input.builderId || null,
+      facing: input.facing || null,
+      plotLength: input.plotLength || null,
+      plotWidth: input.plotWidth || null,
+      plotApprovalType: input.plotApprovalType || null,
     };
 
     const headers: Record<string, string> = {};
@@ -330,6 +340,11 @@ class PropertyService implements IPropertyService {
       country: input.address.country || 'India',
       zipCode: input.address.zipCode,
       zone: input.address.zone || '',
+      builderId: input.builderId || null,
+      facing: input.facing || null,
+      plotLength: input.plotLength || null,
+      plotWidth: input.plotWidth || null,
+      plotApprovalType: input.plotApprovalType || null,
     };
 
     const formData = new FormData();

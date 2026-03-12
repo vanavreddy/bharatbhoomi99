@@ -36,7 +36,7 @@ function BuilderCard({ builder, onClick }: { builder: Builder; onClick: () => vo
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
         {/* Logo with fallback to initials */}
         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-          {!imgError ? (
+          {!imgError && builder.logo ? (
             <Image
               src={builder.logo}
               alt={`${builder.name} logo`}

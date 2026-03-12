@@ -16,6 +16,7 @@ export const API_CONFIG = {
       CREATE: '/api/bb/property',
       DETAIL: (id: string | number) => `/api/bb/property/${id}`,
       FILTER_RANGE: '/api/bb/property/filterRange',
+      MY: '/api/bb/property/my',
     },
     // BB self-contained auth endpoints
     AUTH: {

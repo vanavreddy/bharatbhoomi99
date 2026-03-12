@@ -45,7 +45,7 @@ export function CTASection() {
                 className="border-white text-white hover:bg-white hover:text-brand-accent"
                 asChild
               >
-                <Link href={ROUTES.LIST_PROPERTY}>List Property for Free</Link>
+                <Link href={ROUTES.LIST_PROPERTY}>Sell Property for Free</Link>
               </Button>
             </div>
           </div>
