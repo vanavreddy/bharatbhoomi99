@@ -6,7 +6,7 @@ import { Container } from '@/components/layout';
 import { Pagination } from '@/components/ui';
 import { PropertyGrid } from '@/components/property';
 import { usePropertySearch, useDebounce } from '@/hooks';
-import { PROPERTY_TYPES, FURNISHING_OPTIONS, MAJOR_CITIES } from '@/lib/constants';
+import { PROPERTY_TYPES, FURNISHING_OPTIONS, BANGALORE_AREAS } from '@/lib/constants';
 import type { PropertyFilters, PropertyType, FurnishingStatus } from '@/types/property.types';
 import {
   Search,
@@ -252,11 +252,11 @@ function PropertiesContent() {
                 )}
               </div>
 
-              {/* City Filter */}
+              {/* Area Filter */}
               <div className="py-4 border-t border-gray-100">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">City</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Area</h3>
                 <div className="space-y-2">
-                  {MAJOR_CITIES.slice(0, 6).map((c) => (
+                  {BANGALORE_AREAS.slice(0, 8).map((c) => (
                     <label key={c} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"

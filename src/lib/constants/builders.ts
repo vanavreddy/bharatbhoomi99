@@ -62,7 +62,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
       "Godrej Properties is one of India's leading real estate companies. As part of the 127-year-old Godrej Group, they bring quality, trust, and innovation to every project they build.",
     projectCount: 200,
     established: 1990,
-    headquarters: 'Mumbai',
+    headquarters: 'Bangalore',
     isActive: false,
   },
   {
@@ -77,7 +77,7 @@ export const BANGALORE_BUILDERS: Builder[] = [
       "Birla Estates, a part of the Aditya Birla Group, is committed to developing landmark projects. With a focus on design excellence and customer satisfaction, they're redefining modern living.",
     projectCount: 50,
     established: 2016,
-    headquarters: 'Mumbai',
+    headquarters: 'Bangalore',
     isActive: false,
   },
   {
