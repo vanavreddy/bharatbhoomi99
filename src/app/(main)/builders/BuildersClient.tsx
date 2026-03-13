@@ -8,7 +8,7 @@ import { useBuilders } from '@/contexts';
 import { Building2, MapPin, Calendar } from 'lucide-react';
 
 export default function BuildersClient() {
-  const { activeBuilders } = useBuilders();
+  const { activeBuilders, isLoaded } = useBuilders();
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -37,7 +37,19 @@ export default function BuildersClient() {
 
       {/* Builders Grid - responsive */}
       <Container className="py-6 sm:py-8 md:py-12">
-        {activeBuilders.length === 0 ? (
+        {!isLoaded ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
+                <div className="bg-gray-100 h-24 sm:h-32" />
+                <div className="p-3 sm:p-4 md:p-5 space-y-3">
+                  <div className="h-5 bg-gray-200 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : activeBuilders.length === 0 ? (
           <div className="text-center py-16 sm:py-24">
             <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center">
               <Building2 className="h-10 w-10 text-gray-300" />

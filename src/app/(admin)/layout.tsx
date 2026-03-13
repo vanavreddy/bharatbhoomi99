@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts';
 import { ROUTES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { hasAdminPermission, ADMIN_ROLE_LABELS, type AdminRole } from '@/types';
 import {
   LayoutDashboard,
   Building2,
@@ -13,14 +14,27 @@ import {
   Home as HomeIcon,
   FileText,
   Mail,
+  Users,
+  Shield,
 } from 'lucide-react';
 
-const sidebarLinks = [
-  { label: 'Dashboard', href: ROUTES.ADMIN, icon: LayoutDashboard },
-  { label: 'Properties', href: ROUTES.ADMIN_PROPERTIES, icon: FileText },
-  { label: 'Builders', href: ROUTES.ADMIN_BUILDERS, icon: Building2 },
-  { label: 'Contacts', href: ROUTES.ADMIN_CONTACTS, icon: Mail },
+interface SidebarLink {
+  label: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  permission?: string;
+}
+
+const allSidebarLinks: SidebarLink[] = [
+  { label: 'Dashboard', href: ROUTES.ADMIN, icon: LayoutDashboard, permission: 'view_dashboard' },
+  { label: 'Properties', href: ROUTES.ADMIN_PROPERTIES, icon: FileText, permission: 'view_properties' },
+  { label: 'Builders', href: ROUTES.ADMIN_BUILDERS, icon: Building2, permission: 'manage_builders' },
+  { label: 'Contacts', href: ROUTES.ADMIN_CONTACTS, icon: Mail, permission: 'manage_contacts' },
+  { label: 'Team', href: ROUTES.ADMIN_TEAM, icon: Users, permission: 'manage_team' },
 ];
+
+// Pages that bypass the admin layout entirely
+const BYPASS_LAYOUT_PAGES = [ROUTES.ADMIN_LOGIN, ROUTES.ADMIN_JOIN];
 
 export default function AdminLayout({
   children,
@@ -32,18 +46,38 @@ export default function AdminLayout({
   const router = useRouter();
 
   const isAdmin = user?.role === 'admin';
-  const isLoginPage = pathname === ROUTES.ADMIN_LOGIN;
+  const isBypassPage = BYPASS_LAYOUT_PAGES.some(p => pathname?.startsWith(p));
+
+  // Get team role from localStorage user object
+  const teamRole = useMemo(() => {
+    if (typeof window === 'undefined') return 'viewer';
+    try {
+      const stored = localStorage.getItem('bharatbhoomi_user');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const role = parsed.teamRole;
+        return typeof role === 'string' && role.length > 0 ? role : 'viewer';
+      }
+    } catch { /* ignore */ }
+    return 'viewer';
+  }, [user]);
+
+  const visibleLinks = useMemo(() => {
+    return allSidebarLinks.filter(link =>
+      !link.permission || hasAdminPermission(teamRole, link.permission)
+    );
+  }, [teamRole]);
 
   useEffect(() => {
-    if (!isLoading && !isLoginPage) {
+    if (!isLoading && !isBypassPage) {
       if (!isAuthenticated || !isAdmin) {
         router.push(ROUTES.ADMIN_LOGIN);
       }
     }
-  }, [isLoading, isAuthenticated, isAdmin, isLoginPage, router]);
+  }, [isLoading, isAuthenticated, isAdmin, isBypassPage, router]);
 
-  // Show login page without admin layout
-  if (isLoginPage) {
+  // Show bypass pages without admin layout
+  if (isBypassPage) {
     return <>{children}</>;
   }
 
@@ -64,6 +98,10 @@ export default function AdminLayout({
     return null;
   }
 
+  const roleLabel = (teamRole in ADMIN_ROLE_LABELS)
+    ? ADMIN_ROLE_LABELS[teamRole as AdminRole]
+    : teamRole;
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -76,7 +114,7 @@ export default function AdminLayout({
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
-          {sidebarLinks.map((link) => {
+          {visibleLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link
@@ -127,7 +165,10 @@ export default function AdminLayout({
               <p className="text-sm font-medium text-gray-900 truncate">
                 {user?.name || 'Admin'}
               </p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              <div className="flex items-center gap-1">
+                <Shield className="h-3 w-3 text-gray-400" />
+                <p className="text-xs text-gray-500 truncate">{roleLabel}</p>
+              </div>
             </div>
           </div>
         </div>

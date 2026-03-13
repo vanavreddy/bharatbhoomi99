@@ -22,6 +22,8 @@ export const ROUTES = {
   ADMIN_BUILDERS: '/admin/builders',
   ADMIN_PROPERTIES: '/admin/properties',
   ADMIN_CONTACTS: '/admin/contacts',
+  ADMIN_TEAM: '/admin/team',
+  ADMIN_JOIN: '/admin/join',
 } as const;
 
 export const API_ROUTES = {

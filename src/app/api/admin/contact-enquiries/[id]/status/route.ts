@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
-import { bbAdminHeaders } from '@/lib/api/bb-headers';
+import { bbTeamHeaders } from '@/lib/api/bb-headers';
 import { validateAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ export async function PATCH(
     const body = await request.json();
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ADMIN.CONTACT_STATUS(Number(params.id))}`,
-      { method: 'PATCH', headers: bbAdminHeaders(), body: JSON.stringify(body) }
+      { method: 'PATCH', headers: bbTeamHeaders(request), body: JSON.stringify(body) }
     );
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

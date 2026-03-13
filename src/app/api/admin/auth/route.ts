@@ -1,5 +1,7 @@
 /**
- * Admin Auth Route - POST /api/admin/auth (login), DELETE /api/admin/auth (logout)
+ * Admin Auth Route
+ * POST  /api/admin/auth — validate static admin key (bootstrap only)
+ * DELETE /api/admin/auth — clear admin session cookie (logout)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,32 +13,32 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { password } = await request.json();
+    const body: unknown = await request.json();
+    const password = (body as Record<string, unknown>)?.password;
     const adminKey = process.env.BB_ADMIN_KEY;
 
-    if (!adminKey) {
-      console.error('BB_ADMIN_KEY is not configured');
+    if (!adminKey || typeof adminKey !== 'string') {
       return NextResponse.json(
         { success: false, error: 'Server misconfiguration' },
         { status: 500 }
       );
     }
 
-    if (!password || password !== adminKey) {
+    if (!password || typeof password !== 'string' || password !== adminKey) {
       return NextResponse.json(
         { success: false, error: 'Invalid admin credentials' },
         { status: 401 }
       );
     }
 
-    const token = createAdminSessionToken();
+    // Static key login creates a temporary super_admin session for bootstrap
+    const token = createAdminSessionToken('super_admin', 0);
     const response = NextResponse.json({ success: true }, { status: 200 });
     response.headers.set('Set-Cookie', adminSessionSetCookie(token));
     return response;
-  } catch (error) {
-    console.error('Admin auth error:', error);
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Authentication failed' },
       { status: 500 }
@@ -44,7 +46,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(): Promise<NextResponse> {
   const response = NextResponse.json({ success: true });
   response.headers.set('Set-Cookie', adminSessionClearCookie());
   return response;

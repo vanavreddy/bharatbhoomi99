@@ -21,11 +21,12 @@ export default function AdminDashboardPage() {
   const { activeBuilders } = useBuilders();
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     adminService.getAnalytics()
       .then(setAnalytics)
-      .catch(() => {/* silent */})
+      .catch(() => setError('Failed to load analytics'))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -47,6 +48,10 @@ export default function AdminDashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-500 mt-1">Real-time analytics from the backend</p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">

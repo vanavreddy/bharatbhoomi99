@@ -94,8 +94,9 @@ export default function AdminBuildersPage() {
     setIsSubmitting(true);
 
     try {
+      let res: Response;
       if (editingId) {
-        await fetch(`/api/admin/builders/${editingId}`, {
+        res = await fetch(`/api/admin/builders/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -110,7 +111,7 @@ export default function AdminBuildersPage() {
         });
       } else {
         const builderId = `builder-${Date.now()}`;
-        await fetch('/api/admin/builders', {
+        res = await fetch('/api/admin/builders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -125,6 +126,11 @@ export default function AdminBuildersPage() {
             headQuarters: form.headquarters || undefined,
           }),
         });
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.apiErrors?.[0] || `Failed (status ${res.status})`);
       }
 
       setShowForm(false);

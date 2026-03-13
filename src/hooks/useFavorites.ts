@@ -10,6 +10,7 @@ export function useFavorites() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
   const { showToast } = useToast();
@@ -18,6 +19,7 @@ export function useFavorites() {
   const fetchFavorites = useCallback(async () => {
     if (!isLoggedIn) return;
     setIsLoading(true);
+    setError(null);
     try {
       const data = await favoritesService.getFavorites(user.id);
       if (mountedRef.current) {
@@ -25,7 +27,7 @@ export function useFavorites() {
         setFavoriteIds(new Set(data.map((f) => f.propertyId)));
       }
     } catch {
-      // silently fail — favorites are non-critical
+      if (mountedRef.current) setError('Could not load favorites');
     } finally {
       if (mountedRef.current) setIsLoading(false);
     }
@@ -82,6 +84,7 @@ export function useFavorites() {
   return {
     favorites,
     isLoading,
+    error,
     addFavorite,
     removeFavorite,
     isFavorited,

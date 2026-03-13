@@ -34,6 +34,14 @@ class AdminService {
     return unwrapBBResponse(data);
   }
 
+  async getPropertyDetail(id: number): Promise<AdminProperty> {
+    const res = await fetch(`/api/admin/properties/${id}`, {
+      headers: adminHeaders,
+    });
+    const data: BBApiResponse<ExternalBBAdminProperty> = await res.json();
+    return unwrapBBResponse(data);
+  }
+
   async approveProperty(id: number, adminUserId: number): Promise<void> {
     const body: BBApprovePropertyRequest = { adminUserId };
     const res = await fetch(`/api/admin/properties/${id}/approve`, {

@@ -124,6 +124,34 @@ export interface ExternalBBAdminProperty {
   createdOn: string | null;
   oUserID: number | null;
   ownerName: string | null;
+  // Enriched fields
+  type: string | null;
+  bedRooms: string | null;
+  baths: string | null;
+  rent: number;
+  deposit: number;
+  area: number;
+  isNegotiable: boolean;
+  isFurnished: boolean;
+  comments: string | null;
+  parking: string | null;
+  water: string | null;
+  electricity: string | null;
+  facing: string | null;
+  plotLength: number | null;
+  plotWidth: number | null;
+  plotApprovalType: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  zone: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
+  builderName: string | null;
+  imageUrls: string[];
+  noOfImages: number;
 }
 
 // Admin contact enquiry

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
-import { bbAdminHeaders } from '@/lib/api/bb-headers';
+import { bbTeamHeaders } from '@/lib/api/bb-headers';
 import { validateAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ADMIN.CONTACT_ENQUIRIES}`,
-      { headers: bbAdminHeaders() }
+      { headers: bbTeamHeaders(request) }
     );
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

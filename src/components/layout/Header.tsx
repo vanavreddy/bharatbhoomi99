@@ -8,7 +8,7 @@ import { Logo } from './Logo';
 import { Button } from '@/components/ui';
 import { NAV_ITEMS, ROUTES } from '@/lib/constants';
 import { useAuth } from '@/contexts';
-import { Menu, X, Plus, User, ChevronRight, Shield, LogOut, Heart, MessageCircle } from 'lucide-react';
+import { Menu, X, Plus, User, ChevronRight, Shield, LogOut, Heart, MessageCircle, Home } from 'lucide-react';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -112,6 +112,13 @@ export function Header() {
               ) : (
                 <div className="flex items-center gap-1">
                   <Link
+                    href={ROUTES.MY_PROPERTIES}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
+                    title="My Properties"
+                  >
+                    <Home className="h-4 w-4" />
+                  </Link>
+                  <Link
                     href={ROUTES.FAVORITES}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
                     title="Favorites"
@@ -126,9 +133,14 @@ export function Header() {
                     <MessageCircle className="h-4 w-4" />
                   </Link>
                   <div className="h-5 w-px bg-gray-200/60" />
-                  <span className="text-sm text-gray-700 font-medium hidden xl:inline">
-                    {user?.name || 'User'}
-                  </span>
+                  <Link
+                    href={ROUTES.PROFILE}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
+                    title="Profile"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden xl:inline">{user?.name || 'User'}</span>
+                  </Link>
                   <button
                     type="button"
                     onClick={() => signOut()}
@@ -260,6 +272,19 @@ export function Header() {
                   <ChevronRight className="h-4 w-4 text-gray-400" />
                 </Link>
                 <Link
+                  href={ROUTES.MY_PROPERTIES}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
+                >
+                  <span className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
+                      <Home className="h-4 w-4 text-brand-primary" />
+                    </div>
+                    My Properties
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </Link>
+                <Link
                   href={ROUTES.ENQUIRIES}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
@@ -269,6 +294,19 @@ export function Header() {
                       <MessageCircle className="h-4 w-4 text-brand-primary" />
                     </div>
                     Enquiries
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </Link>
+                <Link
+                  href={ROUTES.PROFILE}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
+                >
+                  <span className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                      <User className="h-4 w-4 text-blue-500" />
+                    </div>
+                    Profile
                   </span>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
                 </Link>

@@ -163,7 +163,8 @@ export function usePropertySearch(
           setError(err instanceof Error ? err.message : 'An error occurred');
         }
       } finally {
-        if (mountedRef.current) {
+        // Don't update loading state for aborted requests — another fetch is taking over
+        if (mountedRef.current && !currentController.signal.aborted) {
           setIsLoading(false);
           setIsSearching(false);
         }

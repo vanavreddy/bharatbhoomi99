@@ -188,6 +188,11 @@ function ErrorState({ error, onRetry }: { error: string; onRetry: () => void }) 
 function ImageGallery({ images, title, isLoggedIn, onLoginPrompt }: { images: readonly { id: string; url: string; alt: string; isPrimary: boolean }[]; title: string; isLoggedIn: boolean; onLoginPrompt: () => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  const handleImageError = (imageId: string) => {
+    setFailedImages((prev) => new Set(prev).add(imageId));
+  };
 
   const primaryImage = images.find((img) => img.isPrimary) || images[0];
   const selectedImage = images[selectedIndex] || primaryImage;
@@ -232,14 +237,21 @@ function ImageGallery({ images, title, isLoggedIn, onLoginPrompt }: { images: re
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && (isLoggedIn ? setIsLightboxOpen(true) : onLoginPrompt())}
       >
-        <Image
-          src={selectedImage.url}
-          alt={selectedImage.alt || title}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          priority
-          sizes="(max-width: 1024px) 100vw, 66vw"
-        />
+        {failedImages.has(selectedImage.id) ? (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <Building className="h-12 w-12 text-gray-300" />
+          </div>
+        ) : (
+          <Image
+            src={selectedImage.url}
+            alt={selectedImage.alt || title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            priority
+            sizes="(max-width: 1024px) 100vw, 66vw"
+            onError={() => handleImageError(selectedImage.id)}
+          />
+        )}
 
         {/* Navigation arrows */}
         {visibleImages.length > 1 && (
@@ -298,13 +310,20 @@ function ImageGallery({ images, title, isLoggedIn, onLoginPrompt }: { images: re
                 selectedIndex === index ? 'ring-2 ring-brand-primary' : 'opacity-70 hover:opacity-100'
               }`}
             >
-              <Image
-                src={image.url}
-                alt={image.alt || `Photo ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="80px"
-              />
+              {failedImages.has(image.id) ? (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <Building className="h-4 w-4 text-gray-300" />
+                </div>
+              ) : (
+                <Image
+                  src={image.url}
+                  alt={image.alt || `Photo ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                  onError={() => handleImageError(image.id)}
+                />
+              )}
             </button>
           ))}
           {hasHiddenImages && (
@@ -350,13 +369,20 @@ function ImageGallery({ images, title, isLoggedIn, onLoginPrompt }: { images: re
           </button>
 
           <div className="relative w-full max-w-5xl aspect-[16/10] mx-4">
-            <Image
-              src={selectedImage.url}
-              alt={selectedImage.alt || title}
-              fill
-              className="object-contain"
-              sizes="100vw"
-            />
+            {failedImages.has(selectedImage.id) ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <Building className="h-16 w-16 text-gray-500" />
+              </div>
+            ) : (
+              <Image
+                src={selectedImage.url}
+                alt={selectedImage.alt || title}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                onError={() => handleImageError(selectedImage.id)}
+              />
+            )}
           </div>
 
           <button
@@ -731,13 +757,16 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
                       size="lg"
                       leftIcon={<Phone className="h-5 w-5" />}
                       onClick={() => {
-                        // Track contact view
+                        // Track contact view then open phone
                         if (property && user) {
                           fetch(`/api/properties/${property.id}/contact-view`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-BB-User-Id': String(user.id) },
                             body: JSON.stringify({ propertyId: Number(property.id), viewerUserId: user.id, ownerUserId: Number(property.owner.id) }),
                           }).catch(() => {});
+                        }
+                        if (property?.owner?.phone) {
+                          window.location.href = `tel:${property.owner.phone}`;
                         }
                       }}
                     >

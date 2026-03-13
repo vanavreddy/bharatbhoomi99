@@ -15,9 +15,11 @@ export default function AdminContactsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { showToast } = useToast();
   const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   const fetchContacts = useCallback(async () => {
     setIsLoading(true);
+    setError('');
     try {
       const data = await adminService.getContactEnquiries();
       setContacts(data);
@@ -31,12 +33,15 @@ export default function AdminContactsPage() {
   useEffect(() => { fetchContacts(); }, [fetchContacts]);
 
   const handleStatusChange = async (id: number, newStatus: string) => {
+    setUpdatingId(id);
     try {
       await adminService.updateContactStatus(id, newStatus);
       showToast(`Status updated to ${newStatus}`);
       fetchContacts();
     } catch {
       showToast('Failed to update status', 'error');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -109,7 +114,8 @@ export default function AdminContactsPage() {
                       <select
                         value={c.status}
                         onChange={(e) => handleStatusChange(c.contactId, e.target.value)}
-                        className="text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                        disabled={updatingId === c.contactId}
+                        className="text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-50"
                       >
                         {STATUS_OPTIONS.map((s) => (
                           <option key={s} value={s}>{s}</option>

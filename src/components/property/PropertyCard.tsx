@@ -34,6 +34,7 @@ export function PropertyCard({ property, className, priority = false, variant = 
   const { user, isAuthenticated, isGuest } = useAuth();
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const router = useRouter();
 
   const isLoggedIn = isAuthenticated && !isGuest;
@@ -80,7 +81,7 @@ export function PropertyCard({ property, className, priority = false, variant = 
           >
             {/* Image */}
             <div className="relative w-full sm:w-72 h-48 sm:h-auto flex-shrink-0">
-              {primaryImage ? (
+              {primaryImage && !imgError ? (
                 <Image
                   src={primaryImage.url}
                   alt={primaryImage.alt}
@@ -88,6 +89,7 @@ export function PropertyCard({ property, className, priority = false, variant = 
                   className="object-cover"
                   sizes="(max-width: 640px) 100vw, 288px"
                   priority={priority}
+                  onError={() => setImgError(true)}
                 />
               ) : (
                 <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
@@ -199,7 +201,7 @@ export function PropertyCard({ property, className, priority = false, variant = 
         >
           {/* Image */}
           <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-            {primaryImage ? (
+            {primaryImage && !imgError ? (
               <Image
                 src={primaryImage.url}
                 alt={primaryImage.alt}
@@ -207,6 +209,7 @@ export function PropertyCard({ property, className, priority = false, variant = 
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 priority={priority}
+                onError={() => setImgError(true)}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">

@@ -10,6 +10,7 @@ export function useEnquiries() {
   const [sent, setSent] = useState<Enquiry[]>([]);
   const [received, setReceived] = useState<Enquiry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
   const isLoggedIn = isAuthenticated && !isGuest && user;
@@ -17,6 +18,7 @@ export function useEnquiries() {
   const fetchAll = useCallback(async () => {
     if (!isLoggedIn) return;
     setIsLoading(true);
+    setError(null);
     try {
       const [sentData, receivedData] = await Promise.all([
         enquiryService.getSentEnquiries(user.id),
@@ -27,7 +29,7 @@ export function useEnquiries() {
         setReceived(receivedData);
       }
     } catch {
-      // silent fail
+      if (mountedRef.current) setError('Failed to load enquiries');
     } finally {
       if (mountedRef.current) setIsLoading(false);
     }
@@ -45,5 +47,5 @@ export function useEnquiries() {
     fetchAll();
   }, [isLoggedIn, user, fetchAll]);
 
-  return { sent, received, isLoading, respondToEnquiry, refetch: fetchAll };
+  return { sent, received, isLoading, error, respondToEnquiry, refetch: fetchAll };
 }

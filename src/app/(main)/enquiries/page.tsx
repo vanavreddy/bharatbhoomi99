@@ -27,8 +27,9 @@ const statusBadge = (status: string) => {
 export default function EnquiriesPage() {
   const { isAuthenticated, isGuest } = useAuth();
   const { showToast } = useToast();
-  const { sent, received, isLoading, respondToEnquiry } = useEnquiries();
+  const { sent, received, isLoading, error, respondToEnquiry } = useEnquiries();
   const [tab, setTab] = useState<Tab>('sent');
+  const [respondingId, setRespondingId] = useState<number | null>(null);
 
   const isLoggedIn = isAuthenticated && !isGuest;
 
@@ -79,6 +80,10 @@ export default function EnquiriesPage() {
             Received ({received.length})
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</div>
+        )}
 
         {isLoading ? (
           <div className="space-y-4">
@@ -148,16 +153,38 @@ export default function EnquiriesPage() {
                       <div className="flex gap-2 flex-shrink-0">
                         <button
                           type="button"
-                          onClick={async () => { await respondToEnquiry(enquiry.enquiryId, 'accepted'); showToast('Enquiry accepted'); }}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          disabled={respondingId === enquiry.enquiryId}
+                          onClick={async () => {
+                            setRespondingId(enquiry.enquiryId);
+                            try {
+                              await respondToEnquiry(enquiry.enquiryId, 'accepted');
+                              showToast('Enquiry accepted');
+                            } catch {
+                              showToast('Failed to accept enquiry', 'error');
+                            } finally {
+                              setRespondingId(null);
+                            }
+                          }}
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
                           title="Accept"
                         >
                           <CheckCircle className="h-5 w-5" />
                         </button>
                         <button
                           type="button"
-                          onClick={async () => { await respondToEnquiry(enquiry.enquiryId, 'rejected'); showToast('Enquiry rejected'); }}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          disabled={respondingId === enquiry.enquiryId}
+                          onClick={async () => {
+                            setRespondingId(enquiry.enquiryId);
+                            try {
+                              await respondToEnquiry(enquiry.enquiryId, 'rejected');
+                              showToast('Enquiry rejected');
+                            } catch {
+                              showToast('Failed to reject enquiry', 'error');
+                            } finally {
+                              setRespondingId(null);
+                            }
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                           title="Reject"
                         >
                           <XCircle className="h-5 w-5" />
