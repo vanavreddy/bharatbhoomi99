@@ -21,7 +21,7 @@ export function useFavorites() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await favoritesService.getFavorites(user.id);
+      const data = await favoritesService.getFavorites();
       if (mountedRef.current) {
         setFavorites(data);
         setFavoriteIds(new Set(data.map((f) => f.propertyId)));
@@ -31,7 +31,7 @@ export function useFavorites() {
     } finally {
       if (mountedRef.current) setIsLoading(false);
     }
-  }, [isLoggedIn, user]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -44,7 +44,7 @@ export function useFavorites() {
     // Optimistic update
     setFavoriteIds((prev) => new Set(prev).add(propertyId));
     try {
-      await favoritesService.addFavorite(user.id, propertyId);
+      await favoritesService.addFavorite(propertyId);
       showToast('Added to favorites');
       fetchFavorites(); // Sync with server
     } catch {
@@ -67,7 +67,7 @@ export function useFavorites() {
       return next;
     });
     try {
-      await favoritesService.removeFavorite(user.id, propertyId);
+      await favoritesService.removeFavorite(propertyId);
       showToast('Removed from favorites');
       fetchFavorites(); // Sync with server
     } catch {

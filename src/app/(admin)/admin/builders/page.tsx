@@ -56,6 +56,7 @@ export default function AdminBuildersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [uploadingLogoFor, setUploadingLogoFor] = useState<string | null>(null);
   const [form, setForm] = useState<BuilderFormData>(emptyForm);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const { showToast } = useToast();
@@ -145,6 +146,38 @@ export default function AdminBuildersPage() {
     }
   };
 
+  /**
+   * Logo upload, offered only while editing an existing builder.
+   *
+   * The blob path is keyed by builder id, so there is nowhere to put the file
+   * until the record exists --- which is why this is not part of the create
+   * form.
+   */
+  const handleLogoUpload = async (builderId: string, file: File) => {
+    setUploadingLogoFor(builderId);
+    try {
+      const formData = new FormData();
+      formData.append('logo', file);
+
+      const res = await fetch(`/api/admin/builders/${builderId}/logo`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.apiErrors?.[0] ?? 'Could not upload the logo', 'error');
+        return;
+      }
+      showToast('Logo updated');
+      fetchBuilders();
+    } catch {
+      showToast('Could not reach the server', 'error');
+    } finally {
+      setUploadingLogoFor(null);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     try {
       await fetch(`/api/admin/builders/${id}`, {
@@ -219,6 +252,31 @@ export default function AdminBuildersPage() {
                 className="w-full px-4 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary focus:bg-white transition-all resize-none"
               />
             </div>
+            {editingId && (
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Logo
+                </label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  aria-label="Upload builder logo"
+                  disabled={uploadingLogoFor === editingId}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void handleLogoUpload(editingId, file);
+                    // Reset so re-picking the same file fires change again.
+                    e.target.value = '';
+                  }}
+                  className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 disabled:opacity-50"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  PNG, JPG, WebP or GIF, up to 10 MB.
+                  {uploadingLogoFor === editingId && ' Uploading…'}
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 pt-2">
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Saving...' : editingId ? 'Update Builder' : 'Add Builder'}

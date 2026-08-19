@@ -230,6 +230,7 @@ export interface BBPropertySearchRequest {
   minRent?: number;
   maxRent?: number;
   isFurnished?: boolean;
+  isFeatured?: boolean;
   builderId?: string;
   page: number;
   limit: number;

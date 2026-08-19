@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
-import { bbUserHeaders } from '@/lib/api/bb-headers';
+import { bbHeaders } from '@/lib/api/bb-headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,14 +12,10 @@ const { BASE_URL, ENDPOINTS } = API_CONFIG;
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json({ apiErrors: ['User ID required'] }, { status: 401 });
-    }
-
     const response = await fetch(
-      `${BASE_URL}${ENDPOINTS.BB_ENQUIRY.SENT}?userId=${userId}`,
-      { headers: bbUserHeaders(userId) }
+      `${BASE_URL}${ENDPOINTS.BB_ENQUIRY.SENT}`,
+      {
+      cache: 'no-store', headers: bbHeaders(request) }
     );
 
     const data = await response.json();

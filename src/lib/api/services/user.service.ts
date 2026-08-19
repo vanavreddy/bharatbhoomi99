@@ -23,27 +23,27 @@ interface AvatarUploadResponse {
   error?: { code: string; message: string };
 }
 
-const userHeaders = (userId: number): Record<string, string> => ({
+// The session cookie travels automatically on a same-origin fetch, so these
+// requests need nothing beyond the content type.
+const userHeaders = (): Record<string, string> => ({
   'Content-Type': 'application/json',
-  'X-BB-User-Id': String(userId),
 });
 
 class UserService {
-  async getProfile(userId: number): Promise<UserProfile> {
+  async getProfile(): Promise<UserProfile> {
     const res = await fetch('/api/user/profile', {
-      headers: userHeaders(userId),
+      headers: userHeaders(),
     });
     const data: BBApiResponse<UserProfile> = await res.json();
     return unwrapBBResponse(data);
   }
 
   async updateProfile(
-    userId: number,
     updates: { firstName?: string; lastName?: string; phone?: string }
   ): Promise<UserProfile> {
     const res = await fetch('/api/user/profile', {
       method: 'PUT',
-      headers: userHeaders(userId),
+      headers: userHeaders(),
       body: JSON.stringify(updates),
     });
     const data: BBApiResponse<UserProfile> = await res.json();
@@ -51,26 +51,24 @@ class UserService {
   }
 
   async changePassword(
-    userId: number,
     currentPassword: string,
     newPassword: string
   ): Promise<{ message: string }> {
     const res = await fetch('/api/user/change-password', {
       method: 'POST',
-      headers: userHeaders(userId),
+      headers: userHeaders(),
       body: JSON.stringify({ currentPassword, newPassword }),
     });
     const data: BBApiResponse<{ message: string }> = await res.json();
     return unwrapBBResponse(data);
   }
 
-  async uploadAvatar(userId: number, file: File): Promise<{ avatarUrl: string }> {
+  async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
     const formData = new FormData();
     formData.append('avatar', file);
 
     const res = await fetch('/api/user/avatar', {
       method: 'POST',
-      headers: { 'X-BB-User-Id': String(userId) },
       body: formData,
     });
     const data: AvatarUploadResponse = await res.json();

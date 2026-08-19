@@ -79,7 +79,6 @@ export function useCreateProperty(): UseCreatePropertyResult {
 
         const headers: Record<string, string> = {};
         if (userId) {
-          headers['X-BB-User-Id'] = String(userId);
         }
 
         const response = await fetch('/api/properties/create', {

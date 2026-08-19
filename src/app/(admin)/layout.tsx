@@ -16,6 +16,7 @@ import {
   Mail,
   Users,
   Shield,
+  UserRound,
 } from 'lucide-react';
 
 interface SidebarLink {
@@ -30,6 +31,7 @@ const allSidebarLinks: SidebarLink[] = [
   { label: 'Properties', href: ROUTES.ADMIN_PROPERTIES, icon: FileText, permission: 'view_properties' },
   { label: 'Builders', href: ROUTES.ADMIN_BUILDERS, icon: Building2, permission: 'manage_builders' },
   { label: 'Contacts', href: ROUTES.ADMIN_CONTACTS, icon: Mail, permission: 'manage_contacts' },
+  { label: 'Users', href: ROUTES.ADMIN_USERS, icon: UserRound, permission: 'manage_users' },
   { label: 'Team', href: ROUTES.ADMIN_TEAM, icon: Users, permission: 'manage_team' },
 ];
 

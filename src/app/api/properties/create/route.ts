@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isApiError } from '@/lib/api/errors';
 import { API_CONFIG } from '@/lib/api/config';
+import { bbUploadHeaders } from '@/lib/api/bb-headers';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -46,7 +47,7 @@ const createPropertySchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get('content-type') || '';
-    const userId = request.headers.get('X-BB-User-Id') || undefined;
+
 
     let body: unknown;
     let imageFiles: File[] = [];
@@ -137,10 +138,9 @@ export async function POST(request: NextRequest) {
     };
 
     const backendUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROPERTY.CREATE}`;
-    const headers: Record<string, string> = {};
-    if (userId) {
-      headers['X-BB-User-Id'] = userId;
-    }
+    // Multipart sets its own Content-Type boundary, so only the cookie is
+    // forwarded here; the owner is whoever the session says it is.
+    const headers = bbUploadHeaders(request);
 
     let response: Response;
 

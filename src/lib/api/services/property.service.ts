@@ -49,6 +49,7 @@ export interface CreatePropertyInput {
   area: number;
   isNegotiable?: boolean;
   isFurnished?: boolean;
+  isFeatured?: boolean;
   comments?: string;
   parking?: string;
   water?: string;
@@ -205,6 +206,9 @@ class PropertyService implements IPropertyService {
       if (filters.maxPrice !== undefined) {
         searchRequest.maxRent = filters.maxPrice;
       }
+      if (filters.featured) {
+        searchRequest.isFeatured = true;
+      }
       if (filters.furnishing && filters.furnishing.length > 0) {
         searchRequest.isFurnished = filters.furnishing.includes('furnished');
       }
@@ -284,7 +288,6 @@ class PropertyService implements IPropertyService {
 
     const headers: Record<string, string> = {};
     if (userId) {
-      headers['X-BB-User-Id'] = userId;
     }
 
     const { data } = await httpClient.post<BBSingleResponse<{ bbPropertyId: number }>>(
@@ -357,7 +360,6 @@ class PropertyService implements IPropertyService {
       Accept: 'application/json',
     };
     if (userId) {
-      headers['X-BB-User-Id'] = userId;
     }
 
     const fullUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROPERTY.CREATE}`;

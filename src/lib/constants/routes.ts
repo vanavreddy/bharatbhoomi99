@@ -10,6 +10,9 @@ export const ROUTES = {
   CONTACT: '/contact',
   ABOUT: '/about',
   SIGN_IN: '/sign-in',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password',
+  VERIFY_EMAIL: '/verify-email',
   SIGN_UP: '/sign-up',
   PROFILE: '/profile',
   MY_PROPERTIES: '/my-properties',
@@ -22,6 +25,7 @@ export const ROUTES = {
   ADMIN_BUILDERS: '/admin/builders',
   ADMIN_PROPERTIES: '/admin/properties',
   ADMIN_CONTACTS: '/admin/contacts',
+  ADMIN_USERS: '/admin/users',
   ADMIN_TEAM: '/admin/team',
   ADMIN_JOIN: '/admin/join',
 } as const;

@@ -52,6 +52,9 @@ export interface User {
   readonly agencyId: number | null;
   readonly agencyName: string | null;
   readonly createdAt: string | null;
+  /** Admin-team role, present only for active team members. */
+  readonly teamRole?: string;
+  readonly teamMemberId?: number | null;
 }
 
 // ============================================

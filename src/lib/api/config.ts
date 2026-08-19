@@ -22,18 +22,8 @@ export const API_CONFIG = {
     AUTH: {
       REGISTER: '/api/bb/auth/register',
       LOGIN: '/api/bb/auth/login',
-      ADMIN_LOGIN: '/api/bb/auth/admin/login',
-    },
-    // Legacy NK endpoints (kept for reference)
-    NK_AUTH: {
-      GENERATE_OTP: '/api/user/sms/generateAndSendOTPJson?countries=india',
-      VALIDATE_OTP: '/api/user/sms/validateOtpJson',
-      CREATE_USER: '/api/user/Create/',
-      VALIDATE_PASSWORD: '/api/user/validatemember',
-    },
-    AGENT: {
-      DETAILS: '/api/agent/agencydetails',
-      CREATE: '/api/agent/Create',
+      LOGOUT: '/api/bb/auth/logout',
+      ME: '/api/bb/auth/me',
     },
     BB_BUILDER: {
       LIST: '/api/builder',

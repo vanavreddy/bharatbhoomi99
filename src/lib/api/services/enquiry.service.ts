@@ -9,9 +9,9 @@ import type { Enquiry } from '@/types';
 
 export interface IEnquiryService {
   sendEnquiry(propertyId: number, senderUserId: number, message: string): Promise<void>;
-  getSentEnquiries(userId: number): Promise<Enquiry[]>;
-  getReceivedEnquiries(userId: number): Promise<Enquiry[]>;
-  respondToEnquiry(id: number, userId: number, status: string): Promise<void>;
+  getSentEnquiries(): Promise<Enquiry[]>;
+  getReceivedEnquiries(): Promise<Enquiry[]>;
+  respondToEnquiry(id: number, status: string): Promise<void>;
 }
 
 class EnquiryService implements IEnquiryService {
@@ -21,7 +21,6 @@ class EnquiryService implements IEnquiryService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(senderUserId),
       },
       body: JSON.stringify(body),
     });
@@ -29,35 +28,32 @@ class EnquiryService implements IEnquiryService {
     unwrapBBResponse(data);
   }
 
-  async getSentEnquiries(userId: number): Promise<Enquiry[]> {
+  async getSentEnquiries(): Promise<Enquiry[]> {
     const res = await fetch('/api/enquiry/sent', {
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
     });
     const data: BBApiResponse<ExternalBBEnquiry[]> = await res.json();
     return unwrapBBResponse(data);
   }
 
-  async getReceivedEnquiries(userId: number): Promise<Enquiry[]> {
+  async getReceivedEnquiries(): Promise<Enquiry[]> {
     const res = await fetch('/api/enquiry/received', {
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
     });
     const data: BBApiResponse<ExternalBBEnquiry[]> = await res.json();
     return unwrapBBResponse(data);
   }
 
-  async respondToEnquiry(id: number, userId: number, status: string): Promise<void> {
+  async respondToEnquiry(id: number, status: string): Promise<void> {
     const body: BBRespondEnquiryRequest = { status };
     const res = await fetch(`/api/enquiry/${id}/respond`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
       body: JSON.stringify(body),
     });

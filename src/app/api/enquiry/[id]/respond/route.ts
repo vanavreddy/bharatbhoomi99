@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
-import { bbUserHeaders } from '@/lib/api/bb-headers';
+import { bbHeaders } from '@/lib/api/bb-headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,19 +15,15 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json({ apiErrors: ['User ID required'] }, { status: 401 });
-    }
-
     const body = await request.json();
     const enquiryId = Number(params.id);
 
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ENQUIRY.RESPOND(enquiryId)}`,
       {
+      cache: 'no-store',
         method: 'PATCH',
-        headers: bbUserHeaders(userId),
+        headers: bbHeaders(request),
         body: JSON.stringify(body),
       }
     );

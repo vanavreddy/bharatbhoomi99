@@ -5,6 +5,7 @@ import { Container } from '@/components/layout';
 import { Card, Badge, Button } from '@/components/ui';
 import { useAuth } from '@/contexts';
 import { ROUTES } from '@/lib/constants';
+import { TourRequests } from '@/components/property/TourRequests';
 import Link from 'next/link';
 import {
   Building2, MapPin, Calendar, LogIn, Plus, ImageIcon,
@@ -40,7 +41,6 @@ export default function MyPropertiesPage() {
     try {
       const res = await fetch('/api/properties/my', {
         headers: {
-          'X-BB-User-Id': String(user.id),
         },
       });
       const data = await res.json();
@@ -217,6 +217,13 @@ export default function MyPropertiesPage() {
                     )}
                   </div>
                 </Link>
+
+                {/* Outside the <Link>: nested interactive elements inside an
+                    anchor would navigate on click instead of acting. */}
+                <TourRequests
+                  propertyId={prop.bbPropertyId}
+                  disabled={prop.status !== 'approved'}
+                />
               </Card>
             ))}
           </div>

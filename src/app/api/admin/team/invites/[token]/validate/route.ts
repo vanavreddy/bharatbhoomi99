@@ -17,7 +17,8 @@ export async function GET(
   try {
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_TEAM.INVITE_VALIDATE(params.token)}`,
-      { headers: { 'Content-Type': 'application/json' } }
+      {
+      cache: 'no-store', headers: { 'Content-Type': 'application/json' } }
     );
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

@@ -23,6 +23,39 @@ function createAuthError(message: string, status: number = 400, retryable: boole
 }
 
 /**
+ * Extract a usable message from a BB/ASP.NET error payload.
+ * Handles both `apiErrors: string[]` and ASP.NET ProblemDetails
+ * (`{ errors: { Field: [msg] }, title }`) so validation failures
+ * reach the user instead of a generic fallback.
+ */
+async function readErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const body: unknown = await response.clone().json();
+    if (!body || typeof body !== 'object') return fallback;
+
+    const record = body as Record<string, unknown>;
+
+    const apiErrors = record.apiErrors;
+    if (Array.isArray(apiErrors) && apiErrors.length > 0 && typeof apiErrors[0] === 'string') {
+      return apiErrors[0];
+    }
+
+    const errors = record.errors;
+    if (errors && typeof errors === 'object') {
+      const messages = Object.values(errors as Record<string, unknown>)
+        .flatMap((value) => (Array.isArray(value) ? value : [value]))
+        .filter((value): value is string => typeof value === 'string');
+      if (messages.length > 0) return messages.join(' ');
+    }
+
+    if (typeof record.title === 'string') return record.title;
+  } catch {
+    // Non-JSON or empty body — fall through to the caller's message
+  }
+  return fallback;
+}
+
+/**
  * Map BBAuthResponse to simplified User
  */
 export function mapBBUserToUser(bbUser: BBAuthResponse): User {
@@ -93,7 +126,8 @@ export const authService = {
     });
 
     if (!response.ok) {
-      throw ApiError.fromHttpStatus(response.status, 'Failed to create account. Please try again.');
+      const message = await readErrorMessage(response, 'Failed to create account. Please try again.');
+      throw ApiError.fromHttpStatus(response.status, message);
     }
 
     const result: BBApiAuthResponse = await response.json();
@@ -123,7 +157,8 @@ export const authService = {
       if (response.status === 404) {
         throw createAuthError('Account not found. Please sign up.', 404);
       }
-      throw ApiError.fromHttpStatus(response.status, 'Failed to sign in. Please try again.');
+      const message = await readErrorMessage(response, 'Failed to sign in. Please try again.');
+      throw ApiError.fromHttpStatus(response.status, message);
     }
 
     const data: BBApiAuthResponse = await response.json();

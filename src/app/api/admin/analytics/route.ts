@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
 import { bbTeamHeaders } from '@/lib/api/bb-headers';
-import { validateAdminSession } from '@/lib/admin-auth';
+
+// Authorisation lives in the backend, not here.
+//
+// This route used to gate on `bb_admin_session`, an HMAC cookie minted by
+// POST /api/admin/auth from the raw admin key --- with userId 0, so it never
+// identified anyone. The backend now verifies a signed session, re-reads the
+// caller's AdminTeamMembers row on every request, and checks the specific
+// permission the endpoint needs. Keeping a second, weaker gate here only
+// blocked team members who logged in the normal way.
 
 export const dynamic = 'force-dynamic';
 const { BASE_URL, ENDPOINTS } = API_CONFIG;
 
 export async function GET(request: NextRequest) {
-  const authError = validateAdminSession(request);
-  if (authError) return authError;
-
   try {
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ADMIN.ANALYTICS}`,
-      { headers: bbTeamHeaders(request) }
+      {
+      cache: 'no-store', headers: bbTeamHeaders(request) }
     );
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

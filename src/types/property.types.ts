@@ -120,6 +120,8 @@ export interface PropertyFilters {
   furnishing?: FurnishingStatus[];
   sortBy?: 'price_asc' | 'price_desc' | 'date_newest' | 'date_oldest';
   query?: string;
+  /** Only listings an admin has marked as featured. */
+  featured?: boolean;
 }
 
 export interface PropertyListResponse {

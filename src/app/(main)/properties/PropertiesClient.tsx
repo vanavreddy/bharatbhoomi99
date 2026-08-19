@@ -64,6 +64,7 @@ function PropertiesContent() {
   const budget = searchParams.get('budget') || '';
   const furnishing = searchParams.get('furnishing') || '';
   const sort = searchParams.get('sort') || 'relevance';
+  const featured = searchParams.get('featured') === 'true';
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
   // Build filters object
@@ -91,9 +92,14 @@ function PropertiesContent() {
     if (sort && sort !== 'relevance') {
       filters.sortBy = sort as PropertyFilters['sortBy'];
     }
+    // Drives the footer's "Featured Listings" link, which previously landed on
+    // an unfiltered list.
+    if (featured) {
+      filters.featured = true;
+    }
 
     return filters;
-  }, [type, city, bedrooms, budget, furnishing, sort]);
+  }, [type, city, bedrooms, budget, furnishing, sort, featured]);
 
   // Use the property search hook
   const {

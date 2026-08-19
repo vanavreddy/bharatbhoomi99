@@ -5,22 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
+import { bbUploadHeaders } from '@/lib/api/bb-headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: 'UNAUTHORIZED', message: 'User ID is required' },
-          timestamp: new Date().toISOString(),
-        },
-        { status: 401 }
-      );
-    }
 
     const formData = await request.formData();
     const avatar = formData.get('avatar');
@@ -42,7 +32,7 @@ export async function POST(request: NextRequest) {
     const backendUrl = `${API_CONFIG.BASE_URL}/api/bb/user/avatar`;
     const response = await fetch(backendUrl, {
       method: 'POST',
-      headers: { 'X-BB-User-Id': userId },
+      headers: bbUploadHeaders(request),
       body: backendFormData,
     });
 

@@ -56,6 +56,33 @@ export default function AdminPropertiesPage() {
     }
   };
 
+  /**
+   * Toggle the featured flag.
+   *
+   * The backend refuses to feature anything that is not approved, so the
+   * control is only offered on approved listings; the check there is the one
+   * that counts.
+   */
+  const handleToggleFeatured = async (id: number) => {
+    setActioningId(id);
+    try {
+      const res = await fetch(`/api/admin/properties/${id}/feature`, { method: 'PATCH' });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.apiErrors?.[0] ?? 'Could not update the listing', 'error');
+        return;
+      }
+      const isFeatured = Boolean(data.model?.isFeatured);
+      setSelectedProperty((prev) => (prev && prev.propertyID === id ? { ...prev, isFeatured } : prev));
+      showToast(isFeatured ? 'Listing featured' : 'Removed from featured');
+      fetchProperties();
+    } catch {
+      showToast('Could not reach the server', 'error');
+    } finally {
+      setActioningId(null);
+    }
+  };
+
   const handleReject = async () => {
     if (!rejectModal || !rejectModal.reason.trim()) return;
     setActioningId(rejectModal.id);
@@ -429,7 +456,25 @@ export default function AdminPropertiesPage() {
                 <div className="bg-gray-50 rounded-xl p-4 space-y-1">
                   <DetailRow label="Created" value={selectedProperty.createdOn ? formatDate(selectedProperty.createdOn) : '-'} />
                   <DetailRow label="Views" value={selectedProperty.viewCount} />
-                  <DetailRow label="Featured" value={selectedProperty.isFeatured ? 'Yes' : 'No'} />
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-sm text-gray-500">Featured</span>
+                    {selectedProperty.status === 'approved' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeatured(selectedProperty.propertyID)}
+                        disabled={actioningId === selectedProperty.propertyID}
+                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-50 ${
+                          selectedProperty.isFeatured
+                            ? 'bg-brand-accent text-white hover:bg-brand-accent-dark'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {selectedProperty.isFeatured ? 'Featured' : 'Not featured'}
+                      </button>
+                    ) : (
+                      <span className="text-sm text-gray-400">Approve first</span>
+                    )}
+                  </div>
                   <DetailRow label="Images" value={selectedProperty.noOfImages} />
                 </div>
               </div>

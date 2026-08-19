@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
-import { bbUserHeaders } from '@/lib/api/bb-headers';
+import { bbHeaders } from '@/lib/api/bb-headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,14 +13,10 @@ const { BASE_URL, ENDPOINTS } = API_CONFIG;
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json({ apiErrors: ['User ID required'] }, { status: 401 });
-    }
-
     const response = await fetch(
-      `${BASE_URL}${ENDPOINTS.BB_FAVORITES.LIST}?userId=${userId}`,
-      { headers: bbUserHeaders(userId) }
+      `${BASE_URL}${ENDPOINTS.BB_FAVORITES.LIST}`,
+      {
+      cache: 'no-store', headers: bbHeaders(request) }
     );
 
     const data = await response.json();
@@ -33,18 +29,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json({ apiErrors: ['User ID required'] }, { status: 401 });
-    }
-
     const body = await request.json();
 
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_FAVORITES.ADD}`,
       {
+      cache: 'no-store',
         method: 'POST',
-        headers: bbUserHeaders(userId),
+        headers: bbHeaders(request),
         body: JSON.stringify(body),
       }
     );
@@ -59,11 +51,6 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json({ apiErrors: ['User ID required'] }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get('propertyId');
     if (!propertyId) {
@@ -71,10 +58,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     const response = await fetch(
-      `${BASE_URL}${ENDPOINTS.BB_FAVORITES.REMOVE}?userId=${userId}&propertyId=${propertyId}`,
+      `${BASE_URL}${ENDPOINTS.BB_FAVORITES.REMOVE}?propertyId=${propertyId}`,
       {
+      cache: 'no-store',
         method: 'DELETE',
-        headers: bbUserHeaders(userId),
+        headers: bbHeaders(request),
       }
     );
 

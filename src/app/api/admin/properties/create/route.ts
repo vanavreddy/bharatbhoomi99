@@ -120,14 +120,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       plotApprovalType: input.plotApprovalType || null,
     };
 
-    const ownerUserId = String(input.ownerUserId ?? session.userId);
     const autoApprove = input.autoApprove;
 
-    // Build headers: admin key + owner user id
-    const headers: Record<string, string> = {
-      ...bbTeamHeaders(request),
-      'X-BB-User-Id': ownerUserId,
-    };
+    // The admin's session identifies the caller; the backend assigns ownership.
+    const headers: Record<string, string> = { ...bbTeamHeaders(request) };
 
     let response: Response;
 
@@ -140,12 +136,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       // Remove Content-Type so fetch sets multipart boundary
       const { 'Content-Type': _, ...headersWithoutCT } = headers;
       response = await fetch(`${BASE_URL}${ENDPOINTS.PROPERTY.CREATE}`, {
+      cache: 'no-store',
         method: 'POST',
         headers: headersWithoutCT,
         body: backendFormData,
       });
     } else {
       response = await fetch(`${BASE_URL}${ENDPOINTS.PROPERTY.CREATE}`, {
+      cache: 'no-store',
         method: 'POST',
         headers,
         body: JSON.stringify(backendData),
@@ -183,6 +181,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (autoApprove && propertyId) {
       try {
         const approveRes = await fetch(`${BASE_URL}${ENDPOINTS.BB_ADMIN.APPROVE(propertyId)}`, {
+      cache: 'no-store',
           method: 'PATCH',
           headers: bbTeamHeaders(request),
         });

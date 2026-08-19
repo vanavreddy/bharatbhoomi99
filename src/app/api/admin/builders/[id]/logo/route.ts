@@ -4,8 +4,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateAdminSession } from '@/lib/admin-auth';
 import { API_CONFIG } from '@/lib/api/config';
+
+// Authorisation lives in the backend, not here.
+//
+// This route used to gate on `bb_admin_session`, an HMAC cookie minted by
+// POST /api/admin/auth from the raw admin key --- with userId 0, so it never
+// identified anyone. The backend now verifies a signed session, re-reads the
+// caller's AdminTeamMembers row on every request, and checks the specific
+// permission the endpoint needs. Keeping a second, weaker gate here only
+// blocked team members who logged in the normal way.
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +22,6 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authError = validateAdminSession(request);
-    if (authError) return authError;
-
     const formData = await request.formData();
     const logo = formData.get('logo');
     if (!logo || !(logo instanceof File)) {

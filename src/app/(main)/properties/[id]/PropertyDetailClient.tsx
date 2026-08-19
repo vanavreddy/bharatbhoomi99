@@ -761,7 +761,7 @@ export default function PropertyDetailClient({ params }: PropertyPageProps) {
                         if (property && user) {
                           fetch(`/api/properties/${property.id}/contact-view`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'X-BB-User-Id': String(user.id) },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ propertyId: Number(property.id), viewerUserId: user.id, ownerUserId: Number(property.owner.id) }),
                           }).catch(() => {});
                         }

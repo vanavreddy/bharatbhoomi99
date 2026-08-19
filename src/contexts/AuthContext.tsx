@@ -24,7 +24,6 @@ const STORAGE_KEYS = {
 };
 
 // Session timeout in hours
-const SESSION_TIMEOUT_HOURS = 24;
 
 // ============================================
 // Auth State Reducer
@@ -115,45 +114,82 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [authState, dispatchAuth] = useReducer(authReducer, initialAuthState);
 
-  // Restore session on mount
+  /**
+   * Restore the session from the server, not from localStorage.
+   *
+   * The httpOnly session cookie is the only thing that authenticates a
+   * request, and JavaScript cannot read it --- so the client asks the server
+   * who it is. localStorage is still written below, but purely as a display
+   * cache: a stale or hand-edited entry buys nothing, because every API call
+   * is authorised by the cookie's signature rather than by this state.
+   */
   useEffect(() => {
-    const restoreSession = () => {
+    let cancelled = false;
+
+    const restoreSession = async () => {
       try {
-        const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-        const storedLastLogin = localStorage.getItem(STORAGE_KEYS.LAST_LOGIN);
-        const storedIsGuest = localStorage.getItem(STORAGE_KEYS.IS_GUEST);
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
 
-        if (storedUser && storedLastLogin) {
-          const lastLogin = new Date(storedLastLogin);
-          const now = new Date();
-          const hoursSinceLogin = (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
+        if (cancelled) return;
 
-          // Check session timeout
-          if (hoursSinceLogin < SESSION_TIMEOUT_HOURS) {
-            const user = JSON.parse(storedUser) as User;
-            dispatchAuth({
-              type: 'RESTORE_SESSION',
-              payload: {
-                user,
-                lastLogin: storedLastLogin,
-                isGuest: storedIsGuest === 'true',
-              },
-            });
-            return;
-          }
+        if (res.ok && data?.model) {
+          const model = data.model;
+
+          /**
+           * Admin status comes from team membership, not from `BBUsers.Role`.
+           *
+           * Every account --- including the super admin --- has Role 'user' on
+           * the user row; being an admin is a row in AdminTeamMembers. Reading
+           * only `model.role` here makes `isAdmin` false for everybody and
+           * bounces the admin panel back to its login page in a loop.
+           */
+          const teamRole: string | null = model.teamRole ?? null;
+
+          const user: User = {
+            id: Number(model.userId),
+            email: model.email ?? null,
+            name: [model.firstName, model.lastName].filter(Boolean).join(' ') || null,
+            firstName: model.firstName ?? null,
+            lastName: model.lastName ?? null,
+            phone: model.phone ?? null,
+            avatar: model.avatarUrl ?? undefined,
+            role: teamRole ? 'admin' : model.role,
+            isVerified: Boolean(model.isVerified),
+            // BB has no agency concept; these exist on the shared User type
+            // because it is also used by the NammaKutira side.
+            isAgent: false,
+            agencyId: null,
+            agencyName: null,
+            createdAt: null,
+            // Consumed by the admin layout to filter sidebar links by
+            // permission. Server-derived, so a hand-edited localStorage entry
+            // is overwritten on the next page load.
+            ...(teamRole ? { teamRole, teamMemberId: model.teamMemberId ?? null } : {}),
+          } as User;
+
+          dispatchAuth({
+            type: 'RESTORE_SESSION',
+            payload: { user, lastLogin: new Date().toISOString(), isGuest: false },
+          });
+          return;
         }
 
-        // Clear expired session
+        // No valid session: drop any cached display data so the UI does not
+        // show a signed-in header for a session the server has forgotten.
         localStorage.removeItem(STORAGE_KEYS.USER);
         localStorage.removeItem(STORAGE_KEYS.LAST_LOGIN);
         localStorage.removeItem(STORAGE_KEYS.IS_GUEST);
         dispatchAuth({ type: 'SET_LOADING', payload: false });
       } catch {
-        dispatchAuth({ type: 'SET_LOADING', payload: false });
+        if (!cancelled) dispatchAuth({ type: 'SET_LOADING', payload: false });
       }
     };
 
-    restoreSession();
+    void restoreSession();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Save session to localStorage when auth state changes
@@ -223,8 +259,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem(STORAGE_KEYS.USER);
     localStorage.removeItem(STORAGE_KEYS.LAST_LOGIN);
     localStorage.removeItem(STORAGE_KEYS.IS_GUEST);
-    // Clear admin session cookie
-    fetch('/api/admin/auth', { method: 'DELETE' }).catch(() => {});
+
+    // Clearing local state is not signing out: the session cookie is httpOnly,
+    // so only the server can revoke it. Awaited so the UI does not navigate
+    // away while the browser still holds a valid session.
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    await fetch('/api/admin/auth', { method: 'DELETE' }).catch(() => {});
     dispatchAuth({ type: 'LOGOUT' });
   }, []);
 

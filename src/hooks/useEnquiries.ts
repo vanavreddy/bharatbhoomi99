@@ -21,8 +21,8 @@ export function useEnquiries() {
     setError(null);
     try {
       const [sentData, receivedData] = await Promise.all([
-        enquiryService.getSentEnquiries(user.id),
-        enquiryService.getReceivedEnquiries(user.id),
+        enquiryService.getSentEnquiries(),
+        enquiryService.getReceivedEnquiries(),
       ]);
       if (mountedRef.current) {
         setSent(sentData);
@@ -33,7 +33,7 @@ export function useEnquiries() {
     } finally {
       if (mountedRef.current) setIsLoading(false);
     }
-  }, [isLoggedIn, user]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -43,9 +43,9 @@ export function useEnquiries() {
 
   const respondToEnquiry = useCallback(async (enquiryId: number, status: string) => {
     if (!isLoggedIn) return;
-    await enquiryService.respondToEnquiry(enquiryId, user.id, status);
+    await enquiryService.respondToEnquiry(enquiryId, status);
     fetchAll();
-  }, [isLoggedIn, user, fetchAll]);
+  }, [isLoggedIn, fetchAll]);
 
   return { sent, received, isLoading, error, respondToEnquiry, refetch: fetchAll };
 }

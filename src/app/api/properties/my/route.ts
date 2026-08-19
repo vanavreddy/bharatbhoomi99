@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
+import { bbHeaders } from '@/lib/api/bb-headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,19 +13,10 @@ const { BASE_URL, ENDPOINTS } = API_CONFIG;
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'User ID is required' } },
-        { status: 401 }
-      );
-    }
 
     const response = await fetch(`${BASE_URL}${ENDPOINTS.PROPERTY.MY}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-BB-User-Id': userId,
-      },
+      cache: 'no-store',
+      headers: bbHeaders(request),
     });
 
     if (!response.ok) {

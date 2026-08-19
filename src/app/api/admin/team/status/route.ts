@@ -7,6 +7,7 @@ const { BASE_URL, ENDPOINTS } = API_CONFIG;
 export async function GET() {
   try {
     const response = await fetch(`${BASE_URL}${ENDPOINTS.BB_TEAM.STATUS}`, {
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await response.json();

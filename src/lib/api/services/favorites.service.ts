@@ -8,30 +8,28 @@ import type { BBApiResponse, ExternalBBFavorite, BBAddFavoriteRequest } from '..
 import type { Favorite } from '@/types';
 
 export interface IFavoritesService {
-  getFavorites(userId: number): Promise<Favorite[]>;
-  addFavorite(userId: number, propertyId: number): Promise<void>;
-  removeFavorite(userId: number, propertyId: number): Promise<void>;
+  getFavorites(): Promise<Favorite[]>;
+  addFavorite(propertyId: number): Promise<void>;
+  removeFavorite(propertyId: number): Promise<void>;
 }
 
 class FavoritesService implements IFavoritesService {
-  async getFavorites(userId: number): Promise<Favorite[]> {
+  async getFavorites(): Promise<Favorite[]> {
     const res = await fetch('/api/favourites', {
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
     });
     const data: BBApiResponse<ExternalBBFavorite[]> = await res.json();
     return unwrapBBResponse(data);
   }
 
-  async addFavorite(userId: number, propertyId: number): Promise<void> {
-    const body: BBAddFavoriteRequest = { userId, propertyId };
+  async addFavorite(propertyId: number): Promise<void> {
+    const body = { propertyId };
     const res = await fetch('/api/favourites', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
       body: JSON.stringify(body),
     });
@@ -39,12 +37,11 @@ class FavoritesService implements IFavoritesService {
     unwrapBBResponse(data);
   }
 
-  async removeFavorite(userId: number, propertyId: number): Promise<void> {
+  async removeFavorite(propertyId: number): Promise<void> {
     const res = await fetch(`/api/favourites?propertyId=${propertyId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
     });
     const data: BBApiResponse<string> = await res.json();

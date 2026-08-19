@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/api/config';
-import { bbUserHeaders } from '@/lib/api/bb-headers';
+import { bbHeaders } from '@/lib/api/bb-headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,19 +15,15 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = request.headers.get('X-BB-User-Id');
-    if (!userId) {
-      return NextResponse.json({ apiErrors: ['User ID required'] }, { status: 401 });
-    }
-
     const body = await request.json();
     const propertyId = Number(params.id);
 
     const response = await fetch(
       `${BASE_URL}${ENDPOINTS.BB_ANALYTICS.HOME_TOUR(propertyId)}`,
       {
+      cache: 'no-store',
         method: 'POST',
-        headers: bbUserHeaders(userId),
+        headers: bbHeaders(request),
         body: JSON.stringify(body),
       }
     );

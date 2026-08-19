@@ -24,7 +24,6 @@ class HomeTourService implements IHomeTourService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-BB-User-Id': String(userId),
       },
       body: JSON.stringify(body),
     });

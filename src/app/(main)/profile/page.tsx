@@ -37,6 +37,31 @@ export default function ProfilePage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+
+  // Email verification
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  const handleSendVerification = async () => {
+    setError('');
+    setIsSendingVerification(true);
+    try {
+      const res = await fetch('/api/auth/send-verification', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.apiErrors?.[0] ?? 'Could not send the verification email.');
+        return;
+      }
+      // Latched rather than reset on a timer: issuing a second token would
+      // invalidate the link the first one just sent.
+      setVerificationSent(true);
+      setSuccessMsg('Verification email sent — check your inbox.');
+    } catch {
+      setError('Could not reach the server. Please try again.');
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
@@ -69,7 +94,7 @@ export default function ProfilePage() {
     if (!user?.id) return;
     let isMounted = true;
 
-    userService.getProfile(user.id)
+    userService.getProfile()
       .then((data) => {
         if (!isMounted) return;
         setProfile(data);
@@ -94,7 +119,7 @@ export default function ProfilePage() {
     setError('');
 
     try {
-      const updated = await userService.updateProfile(user.id, {
+      const updated = await userService.updateProfile({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         phone: phone.trim(),
@@ -139,7 +164,7 @@ export default function ProfilePage() {
 
     setIsSavingPassword(true);
     try {
-      await userService.changePassword(user.id, currentPassword, newPassword);
+      await userService.changePassword(currentPassword, newPassword);
       setPasswordSuccess('Password changed successfully');
       setCurrentPassword('');
       setNewPassword('');
@@ -163,7 +188,7 @@ export default function ProfilePage() {
     setIsUploadingAvatar(true);
     setError('');
     try {
-      const result = await userService.uploadAvatar(user.id, file);
+      const result = await userService.uploadAvatar(file);
       setProfile((prev) => prev ? { ...prev, avatarUrl: result.avatarUrl } : prev);
       setSuccessMsg('Avatar updated');
 
@@ -256,6 +281,20 @@ export default function ProfilePage() {
                 <Shield className="h-3 w-3" />
                 {profile?.isVerified ? 'Verified' : 'Unverified'}
               </div>
+              {profile && !profile.isVerified && (
+                <button
+                  type="button"
+                  onClick={handleSendVerification}
+                  disabled={isSendingVerification || verificationSent}
+                  className="text-xs font-medium text-brand-primary hover:text-brand-primary-dark disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  {verificationSent
+                    ? 'Verification email sent'
+                    : isSendingVerification
+                      ? 'Sending…'
+                      : 'Verify now'}
+                </button>
+              )}
               <div className="flex items-center gap-1 text-xs text-gray-400">
                 <Calendar className="h-3 w-3" />
                 Joined {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : ''}

@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const response = await fetch(`${BASE_URL}${ENDPOINTS.BB_TEAM.BOOTSTRAP}`, {
+      cache: 'no-store',
       method: 'POST',
       headers: bbAdminHeaders(),
       body: JSON.stringify(body),

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isApiError } from '@/lib/api/errors';
 import { API_CONFIG } from '@/lib/api/config';
+import { bbHeaders } from '@/lib/api/bb-headers';
 import { mapPropertyFromBBResponse } from '@/lib/api/mappers';
 
 interface RouteParams {
@@ -30,12 +31,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Forward X-BB-User-Id header so owner can view their own pending property
-    const userId = request.headers.get('X-BB-User-Id');
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (userId) {
-      headers['X-BB-User-Id'] = userId;
-    }
+    // Forwarding the cookie is what lets an owner preview their own pending
+    // listing; for everyone else the backend simply sees no session.
+    const headers = bbHeaders(request);
 
     const backendUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROPERTY.DETAIL(id)}`;
     const backendResponse = await fetch(backendUrl, { headers });

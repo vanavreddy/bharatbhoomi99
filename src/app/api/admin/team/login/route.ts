@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const response = await fetch(`${BASE_URL}${ENDPOINTS.BB_TEAM.LOGIN}`, {
+      cache: 'no-store',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

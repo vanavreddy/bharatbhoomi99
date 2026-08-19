@@ -146,6 +146,15 @@ export default function SignInClient() {
             required
           />
 
+          <div className="flex justify-end -mt-2">
+            <Link
+              href={ROUTES.FORGOT_PASSWORD}
+              className="text-sm text-brand-primary hover:text-brand-primary-dark"
+            >
+              Forgot your password?
+            </Link>
+          </div>
+
           <Button
             type="submit"
             fullWidth
