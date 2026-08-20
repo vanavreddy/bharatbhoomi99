@@ -12,6 +12,15 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
 
+    // `request.formData()` throws on a non-multipart body, and the generic
+    // catch below would turn a client mistake into a 500. Check first.
+    if (!request.headers.get('content-type')?.includes('multipart/form-data')) {
+      return NextResponse.json(
+        { apiErrors: ['Expected multipart/form-data with a \'avatar\' file'] },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
     const avatar = formData.get('avatar');
     if (!avatar || !(avatar instanceof File)) {

@@ -30,8 +30,11 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
         title: `${title} | ${SITE_CONFIG.name}`,
         description,
         url: `${SITE_CONFIG.url}/properties/${id}`,
+        // A stable URL that redirects to a freshly signed blob URL. Embedding
+        // the signed URL directly would expire within the hour, breaking every
+        // link preview shared after that.
         images: primaryImage
-          ? [{ url: primaryImage.url, alt: primaryImage.alt || property.title }]
+          ? [{ url: `${SITE_CONFIG.url}/api/properties/${id}/og-image`, alt: primaryImage.alt || property.title }]
           : [{ url: SITE_CONFIG.ogImage, alt: SITE_CONFIG.name }],
       },
     };

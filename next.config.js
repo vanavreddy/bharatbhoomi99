@@ -3,7 +3,17 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
+    // next/image refuses any host not listed here, so this must track whatever
+    // BLOB_BASE_URL the backend signs URLs against. Driven by env rather than
+    // hardcoded: a mismatch fails as a blank image with a 400 in the network
+    // tab, which looks nothing like a config problem.
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: process.env.BLOB_HOST || 'bbmedia001prd.blob.core.windows.net',
+      },
+      // Legacy: listings created before the storage migration still point at
+      // the old NammaKutira account.
       {
         protocol: 'https',
         hostname: 'nammaimages.blob.core.windows.net',

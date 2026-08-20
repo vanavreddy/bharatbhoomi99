@@ -80,6 +80,7 @@ export const API_CONFIG = {
     },
   },
   ADMIN_KEY: process.env.BB_ADMIN_KEY ?? '',
+  APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
 } as const;
 
 export type ApiEndpoint = typeof API_CONFIG.ENDPOINTS;

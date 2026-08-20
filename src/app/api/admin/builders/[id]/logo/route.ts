@@ -22,6 +22,15 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // `request.formData()` throws on a non-multipart body, and the generic
+    // catch below would turn a client mistake into a 500. Check first.
+    if (!request.headers.get('content-type')?.includes('multipart/form-data')) {
+      return NextResponse.json(
+        { apiErrors: ['Expected multipart/form-data with a \'logo\' file'] },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
     const logo = formData.get('logo');
     if (!logo || !(logo instanceof File)) {
