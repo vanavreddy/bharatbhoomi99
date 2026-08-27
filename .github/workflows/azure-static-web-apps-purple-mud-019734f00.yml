@@ -1,80 +1,98 @@
 name: Azure Static Web Apps CI/CD
 
+# Deploys with the Static Web Apps CLI rather than Azure/static-web-apps-deploy@v1.
+#
+# The action was rejected on every attempt with "No matching Static Web App was
+# found or the api key was invalid", including after the app's
+# deploymentAuthPolicy was corrected from GitHub to DeploymentToken and the
+# token was re-synced. The same token deploys successfully through the CLI, so
+# the CLI is the path that demonstrably works against this app.
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+  workflow_dispatch:
+
+concurrency:
+  group: swa-deploy-bb99
+  cancel-in-progress: false
 
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
-    permissions:
-       id-token: write
-       contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          submodules: true
-          lfs: false
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
-        with:
-           script: |
-               const coredemo = require('@actions/core')
-               return await coredemo.getIDToken()
-           result-encoding: string
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
+          node-version: '22.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
         env:
-          # The backend the proxy routes call. Without this, src/lib/api/config.ts
+          # The backend the proxy routes call. Unset, src/lib/api/config.ts
           # silently falls back to the old .NET API at nammakutiraweb — a wrong
           # backend rather than a failed build, which is far harder to notice.
           API_BASE_URL: https://bb-api-prd.azurewebsites.net
 
-          # Inlined into the client bundle at build time, so they must be set
-          # here; SWA application settings are read at runtime and come too late.
+          # Inlined into the client bundle at build time, so they must be here;
+          # SWA application settings are read at runtime and come too late.
           NEXT_PUBLIC_APP_NAME: "Bharat Bhoomi-99"
           NEXT_PUBLIC_APP_URL: https://www.bharatbhoomi99.com
 
           # Read by next.config.js remotePatterns at build time. next/image
-          # refuses any host not listed, and a mismatch shows up as a blank
+          # refuses any host not listed, and a mismatch surfaces as a blank
           # image with a 400 rather than anything resembling a config error.
           BLOB_HOST: bbmedia001prd.blob.core.windows.net
 
           NEXTAUTH_URL: https://www.bharatbhoomi99.com
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
-          # Shared bootstrap secret. Must stay identical to BB_ADMIN_KEY on
+          # Shared bootstrap secret; must stay identical to BB_ADMIN_KEY on
           # bb-api-prd, which compares it in routes/team.ts.
           BB_ADMIN_KEY: ${{ secrets.BB_ADMIN_KEY }}
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PURPLE_MUD_019734F00 }}
-          action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "." # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "" # Built app content directory - optional
-          github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
+        run: npm run build
 
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          action: "close"
+      # Drop devDependencies before packaging. A local attempt shipped a 1.2 GB
+      # node_modules and failed with "Failed to deploy the Azure Functions" —
+      # SWA packages the Next.js server side as a function app and the tree was
+      # far over the size limit.
+      - name: Prune dev dependencies
+        run: npm prune --omit=dev
+
+      # Run from the parent directory: the CLI refuses to deploy when the
+      # working directory is inside the app folder ("Current directory cannot
+      # be identical to or contained within artifact folders").
+      - name: Deploy via SWA CLI
+        working-directory: ..
+        env:
+          DEPLOYMENT_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PURPLE_MUD_019734F00 }}
+        run: |
+          npx --yes @azure/static-web-apps-cli@latest deploy \
+            --app-location ./bharatbhoomi99 \
+            --deployment-token "$DEPLOYMENT_TOKEN" \
+            --env production \
+            --skip-app-build \
+            --skip-api-build \
+            --verbose silly
+
+      # A green deploy step only means the upload was accepted. This checks the
+      # site is actually serving, and that its proxy routes answer.
+      - name: Verify
+        run: |
+          for i in $(seq 1 10); do
+            sleep 20
+            home=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 30 https://www.bharatbhoomi99.com/ || echo 000)
+            api=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://www.bharatbhoomi99.com/api/properties || echo 000)
+            echo "attempt ${i}: home=${home} api/properties=${api}"
+            if [ "$home" = "200" ] && [ "$api" = "200" ]; then
+              echo "Site is serving."; exit 0
+            fi
+          done
+          echo "::error::Site did not come up healthy after deploy."
+          exit 1
