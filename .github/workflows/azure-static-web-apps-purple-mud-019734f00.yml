@@ -22,6 +22,20 @@ jobs:
   build_and_deploy_job:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    # Job-scoped, not step-scoped. The SWA CLI runs its own Oryx build at
+    # deploy time, so values set only on the Build step are absent for that
+    # pass — the site then ships with API_BASE_URL unset and config.ts falls
+    # back to the old .NET API, which is exactly what happened on the first
+    # successful deploy.
+    env:
+      API_BASE_URL: https://bb-api-prd.azurewebsites.net
+      NEXT_PUBLIC_APP_NAME: "Bharat Bhoomi-99"
+      NEXT_PUBLIC_APP_URL: https://www.bharatbhoomi99.com
+      BLOB_HOST: bbmedia001prd.blob.core.windows.net
+      NEXTAUTH_URL: https://www.bharatbhoomi99.com
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      BB_ADMIN_KEY: ${{ secrets.BB_ADMIN_KEY }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -36,28 +50,6 @@ jobs:
         run: npm install
 
       - name: Build
-        env:
-          # The backend the proxy routes call. Unset, src/lib/api/config.ts
-          # silently falls back to the old .NET API at nammakutiraweb — a wrong
-          # backend rather than a failed build, which is far harder to notice.
-          API_BASE_URL: https://bb-api-prd.azurewebsites.net
-
-          # Inlined into the client bundle at build time, so they must be here;
-          # SWA application settings are read at runtime and come too late.
-          NEXT_PUBLIC_APP_NAME: "Bharat Bhoomi-99"
-          NEXT_PUBLIC_APP_URL: https://www.bharatbhoomi99.com
-
-          # Read by next.config.js remotePatterns at build time. next/image
-          # refuses any host not listed, and a mismatch surfaces as a blank
-          # image with a 400 rather than anything resembling a config error.
-          BLOB_HOST: bbmedia001prd.blob.core.windows.net
-
-          NEXTAUTH_URL: https://www.bharatbhoomi99.com
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-
-          # Shared bootstrap secret; must stay identical to BB_ADMIN_KEY on
-          # bb-api-prd, which compares it in routes/team.ts.
-          BB_ADMIN_KEY: ${{ secrets.BB_ADMIN_KEY }}
         run: npm run build
 
       # Drop devDependencies before packaging. A local attempt shipped a 1.2 GB
