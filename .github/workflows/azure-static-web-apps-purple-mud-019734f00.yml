@@ -79,8 +79,6 @@ jobs:
             --app-location ./bharatbhoomi99 \
             --deployment-token "$DEPLOYMENT_TOKEN" \
             --env production \
-            --skip-app-build \
-            --skip-api-build \
             --verbose silly
 
       # A green deploy step only means the upload was accepted. This checks the
