@@ -25,13 +25,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No npm cache and no `npm ci`: this repo gitignores package-lock.json
+      # (.gitignore:219) and none is committed, so both would fail — the cache
+      # needs a lock file to key on, and `npm ci` refuses to run without one.
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build
         env:
