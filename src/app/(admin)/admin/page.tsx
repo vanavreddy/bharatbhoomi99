@@ -36,7 +36,7 @@ export default function AdminDashboardPage() {
     { label: 'Approved', value: analytics?.approvedProperties ?? '-', icon: CheckCircle, color: 'bg-green-500' },
     { label: 'Rejected', value: analytics?.rejectedProperties ?? '-', icon: XCircle, color: 'bg-red-500' },
     { label: 'Property Views', value: analytics?.totalPropertyViews ?? '-', icon: Eye, color: 'bg-purple-500' },
-    { label: 'Enquiries', value: analytics?.totalEnquiries ?? '-', icon: MessageCircle, color: 'bg-indigo-500' },
+    { label: 'Inquiries', value: analytics?.totalEnquiries ?? '-', icon: MessageCircle, color: 'bg-indigo-500' },
     { label: 'Favorites', value: analytics?.totalFavorites ?? '-', icon: Heart, color: 'bg-rose-500' },
     { label: 'Contact Forms', value: analytics?.totalContactSubmissions ?? '-', icon: Mail, color: 'bg-cyan-500' },
     { label: 'Home Tours', value: analytics?.totalHomeTourRequests ?? '-', icon: CalendarDays, color: 'bg-teal-500' },

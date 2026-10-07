@@ -19,7 +19,7 @@ export const ROUTES = {
   BUILDERS: '/builders',
   BUILDER_DETAIL: (slug: string) => `/builders/${slug}`,
   FAVORITES: '/favorites',
-  ENQUIRIES: '/enquiries',
+  INQUIRIES: '/inquiries',
   ADMIN: '/admin',
   ADMIN_LOGIN: '/admin/login',
   ADMIN_BUILDERS: '/admin/builders',

@@ -24,7 +24,7 @@ export default function AdminContactsPage() {
       const data = await adminService.getContactEnquiries();
       setContacts(data);
     } catch {
-      setError('Failed to load contact enquiries');
+      setError('Failed to load contact inquiries');
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +57,7 @@ export default function AdminContactsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Contact Enquiries</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Contact Inquiries</h1>
           <p className="text-gray-500 mt-1">{contacts.length} submissions</p>
         </div>
         <Button variant="outline" onClick={fetchContacts} leftIcon={<RefreshCw className="h-4 w-4" />}>

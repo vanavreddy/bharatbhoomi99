@@ -126,9 +126,9 @@ export function Header() {
                     <Heart className="h-4 w-4" />
                   </Link>
                   <Link
-                    href={ROUTES.ENQUIRIES}
+                    href={ROUTES.INQUIRIES}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors rounded-full hover:bg-gray-100/60"
-                    title="Enquiries"
+                    title="Inquiries"
                   >
                     <MessageCircle className="h-4 w-4" />
                   </Link>
@@ -285,7 +285,7 @@ export function Header() {
                   <ChevronRight className="h-4 w-4 text-gray-400" />
                 </Link>
                 <Link
-                  href={ROUTES.ENQUIRIES}
+                  href={ROUTES.INQUIRIES}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
                 >
@@ -293,7 +293,7 @@ export function Header() {
                     <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
                       <MessageCircle className="h-4 w-4 text-brand-primary" />
                     </div>
-                    Enquiries
+                    Inquiries
                   </span>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
                 </Link>

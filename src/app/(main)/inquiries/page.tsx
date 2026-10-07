@@ -15,8 +15,11 @@ type Tab = 'sent' | 'received';
 
 const statusBadge = (status: string) => {
   switch (status.toLowerCase()) {
+    // The backend stores responded/closed; accepted/rejected are pre-migration rows.
+    case 'responded':
     case 'accepted':
       return <Badge variant="success" size="sm">Accepted</Badge>;
+    case 'closed':
     case 'rejected':
       return <Badge variant="error" size="sm">Rejected</Badge>;
     default:
@@ -24,7 +27,7 @@ const statusBadge = (status: string) => {
   }
 };
 
-export default function EnquiriesPage() {
+export default function InquiriesPage() {
   const { isAuthenticated, isGuest } = useAuth();
   const { showToast } = useToast();
   const { sent, received, isLoading, error, respondToEnquiry } = useEnquiries();
@@ -40,8 +43,8 @@ export default function EnquiriesPage() {
           <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
             <LogIn className="h-10 w-10 text-gray-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign in to view enquiries</h1>
-          <p className="text-gray-600 mb-6">View and manage your property enquiries.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign in to view inquiries</h1>
+          <p className="text-gray-600 mb-6">View and manage your property inquiries.</p>
           <Link
             href={ROUTES.SIGN_IN}
             className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-brand-primary rounded-lg hover:bg-brand-primary-dark transition-colors"
@@ -59,8 +62,8 @@ export default function EnquiriesPage() {
     <div className="py-8">
       <Container>
         <div className="mb-8">
-          <h1 className="text-3xl font-heading font-bold text-gray-900 mb-2">My Enquiries</h1>
-          <p className="text-gray-600">Manage your property enquiries</p>
+          <h1 className="text-3xl font-heading font-bold text-gray-900 mb-2">My Inquiries</h1>
+          <p className="text-gray-600">Manage your property inquiries</p>
         </div>
 
         {/* Tabs */}
@@ -101,10 +104,10 @@ export default function EnquiriesPage() {
               <MessageCircle className="h-10 w-10 text-gray-400" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              No {tab} enquiries
+              No {tab} inquiries
             </h2>
             <p className="text-gray-500 mb-6">
-              {tab === 'sent' ? "You haven't sent any enquiries yet." : "No one has enquired about your properties yet."}
+              {tab === 'sent' ? "You haven't sent any inquiries yet." : "No one has inquired about your properties yet."}
             </p>
             {tab === 'sent' && (
               <Link
@@ -157,10 +160,10 @@ export default function EnquiriesPage() {
                           onClick={async () => {
                             setRespondingId(enquiry.enquiryId);
                             try {
-                              await respondToEnquiry(enquiry.enquiryId, 'accepted');
-                              showToast('Enquiry accepted');
+                              await respondToEnquiry(enquiry.enquiryId, 'responded');
+                              showToast('Inquiry accepted');
                             } catch {
-                              showToast('Failed to accept enquiry', 'error');
+                              showToast('Failed to accept inquiry', 'error');
                             } finally {
                               setRespondingId(null);
                             }
@@ -176,10 +179,10 @@ export default function EnquiriesPage() {
                           onClick={async () => {
                             setRespondingId(enquiry.enquiryId);
                             try {
-                              await respondToEnquiry(enquiry.enquiryId, 'rejected');
-                              showToast('Enquiry rejected');
+                              await respondToEnquiry(enquiry.enquiryId, 'closed');
+                              showToast('Inquiry rejected');
                             } catch {
-                              showToast('Failed to reject enquiry', 'error');
+                              showToast('Failed to reject inquiry', 'error');
                             } finally {
                               setRespondingId(null);
                             }

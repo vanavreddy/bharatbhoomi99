@@ -147,7 +147,7 @@ export default function MyPropertiesPage() {
               <Building2 className="h-10 w-10 text-gray-400" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">No properties listed yet</h2>
-            <p className="text-gray-500 mb-6">List your first property and start getting enquiries.</p>
+            <p className="text-gray-500 mb-6">List your first property and start getting inquiries.</p>
             <Link
               href={ROUTES.LIST_PROPERTY}
               className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-brand-primary rounded-lg hover:bg-brand-primary-dark transition-colors"

@@ -24,6 +24,13 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  async redirects() {
+    return [
+      // The page was renamed from the British spelling; keep old links working.
+      { source: '/enquiries', destination: '/inquiries', permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {

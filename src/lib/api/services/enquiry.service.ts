@@ -7,6 +7,12 @@ import { unwrapBBResponse } from '../bb-response';
 import type { BBApiResponse, BBSendEnquiryRequest, ExternalBBEnquiry, BBRespondEnquiryRequest } from '../bb-types';
 import type { Enquiry } from '@/types';
 
+/** The backend pages enquiry lists: `{ data, pagination }`, not a bare array. */
+interface BBPagedEnquiries {
+  data: ExternalBBEnquiry[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
 export interface IEnquiryService {
   sendEnquiry(propertyId: number, senderUserId: number, message: string): Promise<void>;
   getSentEnquiries(): Promise<Enquiry[]>;
@@ -34,8 +40,8 @@ class EnquiryService implements IEnquiryService {
         'Content-Type': 'application/json',
       },
     });
-    const data: BBApiResponse<ExternalBBEnquiry[]> = await res.json();
-    return unwrapBBResponse(data);
+    const data: BBApiResponse<BBPagedEnquiries> = await res.json();
+    return unwrapBBResponse(data).data;
   }
 
   async getReceivedEnquiries(): Promise<Enquiry[]> {
@@ -44,8 +50,8 @@ class EnquiryService implements IEnquiryService {
         'Content-Type': 'application/json',
       },
     });
-    const data: BBApiResponse<ExternalBBEnquiry[]> = await res.json();
-    return unwrapBBResponse(data);
+    const data: BBApiResponse<BBPagedEnquiries> = await res.json();
+    return unwrapBBResponse(data).data;
   }
 
   async respondToEnquiry(id: number, status: string): Promise<void> {

@@ -41,10 +41,10 @@ export function EnquiryModal({ isOpen, onClose, propertyId, userId, propertyTitl
     try {
       await enquiryService.sendEnquiry(propertyId, userId, trimmed);
       setSubmitted(true);
-      showToast('Enquiry sent successfully');
+      showToast('Inquiry sent successfully');
     } catch {
-      setError('Failed to send enquiry. Please try again.');
-      showToast('Failed to send enquiry', 'error');
+      setError('Failed to send inquiry. Please try again.');
+      showToast('Failed to send inquiry', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -74,7 +74,7 @@ export function EnquiryModal({ isOpen, onClose, propertyId, userId, propertyTitl
             <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Enquiry Sent!</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Inquiry Sent!</h3>
             <p className="text-sm text-gray-500 mb-4">The property owner will be notified.</p>
             <Button variant="outline" onClick={handleClose}>Close</Button>
           </div>
@@ -83,7 +83,7 @@ export function EnquiryModal({ isOpen, onClose, propertyId, userId, propertyTitl
             <div className="w-12 h-12 mx-auto mb-4 bg-brand-primary/10 rounded-xl flex items-center justify-center">
               <MessageCircle className="h-6 w-6 text-brand-primary" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 text-center mb-1">Send Enquiry</h2>
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-1">Send Inquiry</h2>
             {propertyTitle && (
               <p className="text-sm text-gray-500 text-center mb-4 truncate">
                 About: {propertyTitle}
